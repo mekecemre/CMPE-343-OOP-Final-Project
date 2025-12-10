@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.greengrocer.controllers.RegistrationController"
+            styleClass="main-container">
+    
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox alignment="CENTER" spacing="15" styleClass="registration-box">
+                <padding>
+                    <Insets bottom="30" left="60" right="60" top="30" />
+                </padding>
+                
+                <!-- Title -->
+                <Label text="🥬 Create Account" styleClass="app-title"/>
+                <Label text="Register as a new customer" styleClass="subtitle"/>
+                
+                <!-- Registration Form -->
+                <VBox spacing="12" styleClass="form-container" maxWidth="400">
+                    
+                    <!-- Username -->
+                    <VBox spacing="5">
+                        <Label text="Username *" styleClass="field-label"/>
+                        <TextField fx:id="usernameField" promptText="Choose a username" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <!-- Password -->
+                    <VBox spacing="5">
+                        <Label text="Password *" styleClass="field-label"/>
+                        <PasswordField fx:id="passwordField" promptText="Choose a password" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <!-- Confirm Password -->
+                    <VBox spacing="5">
+                        <Label text="Confirm Password *" styleClass="field-label"/>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <Separator/>
+                    
+                    <!-- Full Name -->
+                    <VBox spacing="5">
+                        <Label text="Full Name" styleClass="field-label"/>
+                        <TextField fx:id="fullNameField" promptText="Enter your full name" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <!-- Address -->
+                    <VBox spacing="5">
+                        <Label text="Address" styleClass="field-label"/>
+                        <TextArea fx:id="addressField" promptText="Enter your delivery address" 
+                                  styleClass="text-area" prefRowCount="2"/>
+                    </VBox>
+                    
+                    <!-- Phone -->
+                    <VBox spacing="5">
+                        <Label text="Phone" styleClass="field-label"/>
+                        <TextField fx:id="phoneField" promptText="Enter your phone number" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <!-- Email -->
+                    <VBox spacing="5">
+                        <Label text="Email" styleClass="field-label"/>
+                        <TextField fx:id="emailField" promptText="Enter your email address" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <!-- Error Label -->
+                    <Label fx:id="errorLabel" styleClass="error-label" visible="false" wrapText="true"/>
+                    
+                    <!-- Buttons -->
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button fx:id="registerButton" text="Register" onAction="#handleRegister" 
+                                styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Button fx:id="cancelButton" text="Back to Login" onAction="#handleCancel" 
+                                styleClass="secondary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    </HBox>
+                    
+                    <Label text="* Required fields" styleClass="small-text"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+</BorderPane>

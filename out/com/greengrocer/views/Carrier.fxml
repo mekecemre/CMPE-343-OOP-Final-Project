@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.greengrocer.controllers.CarrierController"
+            styleClass="main-container">
+    
+    <!-- Top Bar -->
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            
+            <Label text="🚚 Carrier Dashboard" styleClass="brand-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="usernameLabel" text="Carrier: " styleClass="username-label"/>
+            <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary-button"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="danger-button"/>
+        </HBox>
+    </top>
+    
+    <!-- Main Content - Three Sections -->
+    <center>
+        <HBox spacing="15" styleClass="carrier-content">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+            
+            <!-- Available Orders -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="order-section">
+                <Label text="📋 Available Orders" styleClass="section-title"/>
+                <ListView fx:id="availableOrdersList" VBox.vgrow="ALWAYS"/>
+                <Button text="Select Order(s)" onAction="#handleSelectOrders" 
+                        styleClass="primary-button" maxWidth="Infinity"/>
+            </VBox>
+            
+            <!-- Current/Selected Orders -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="order-section">
+                <Label text="📦 Current Deliveries" styleClass="section-title"/>
+                <ListView fx:id="currentOrdersList" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10">
+                    <Button text="Complete Delivery" onAction="#handleCompleteDelivery" 
+                            styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                </HBox>
+            </VBox>
+            
+            <!-- Completed Orders -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="order-section">
+                <Label text="✅ Completed Deliveries" styleClass="section-title"/>
+                <ListView fx:id="completedOrdersList" VBox.vgrow="ALWAYS"/>
+                <Label fx:id="ratingLabel" text="Your Rating: N/A" styleClass="rating-label"/>
+            </VBox>
+        </HBox>
+    </center>
+    
+    <!-- Status Bar -->
+    <bottom>
+        <HBox styleClass="status-bar" alignment="CENTER" spacing="20">
+            <padding>
+                <Insets top="8" right="20" bottom="8" left="20"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Select available orders to deliver"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

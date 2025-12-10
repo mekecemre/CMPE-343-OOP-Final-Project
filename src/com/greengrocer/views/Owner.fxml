@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.greengrocer.controllers.OwnerController"
+            styleClass="main-container">
+    
+    <!-- Top Bar -->
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="20">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            
+            <Label text="👔 Owner Dashboard" styleClass="brand-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="usernameLabel" text="Owner: " styleClass="username-label"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="danger-button"/>
+        </HBox>
+    </top>
+    
+    <!-- Main Content - Tabs -->
+    <center>
+        <TabPane fx:id="mainTabPane" styleClass="owner-tabs">
+            
+            <!-- Products Tab -->
+            <Tab text="📦 Products" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <HBox spacing="10">
+                        <Button text="Add Product" onAction="#handleAddProduct" styleClass="primary-button"/>
+                        <Button text="Edit Selected" onAction="#handleEditProduct" styleClass="secondary-button"/>
+                        <Button text="Delete Selected" onAction="#handleDeleteProduct" styleClass="danger-button"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Refresh" onAction="#handleRefreshProducts" styleClass="secondary-button"/>
+                    </HBox>
+                    
+                    <TableView fx:id="productsTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="prodIdColumn" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="prodNameColumn" text="Name" prefWidth="120"/>
+                            <TableColumn fx:id="prodTypeColumn" text="Type" prefWidth="100"/>
+                            <TableColumn fx:id="prodPriceColumn" text="Price/kg" prefWidth="80"/>
+                            <TableColumn fx:id="prodStockColumn" text="Stock (kg)" prefWidth="80"/>
+                            <TableColumn fx:id="prodThresholdColumn" text="Threshold" prefWidth="80"/>
+                            <TableColumn fx:id="prodStatusColumn" text="Status" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+            
+            <!-- Carriers Tab -->
+            <Tab text="🚚 Carriers" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <HBox spacing="10">
+                        <Button text="Employ Carrier" onAction="#handleEmployCarrier" styleClass="primary-button"/>
+                        <Button text="Fire Selected" onAction="#handleFireCarrier" styleClass="danger-button"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Refresh" onAction="#handleRefreshCarriers" styleClass="secondary-button"/>
+                    </HBox>
+                    
+                    <TableView fx:id="carriersTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="carrIdColumn" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="carrUsernameColumn" text="Username" prefWidth="100"/>
+                            <TableColumn fx:id="carrNameColumn" text="Full Name" prefWidth="150"/>
+                            <TableColumn fx:id="carrPhoneColumn" text="Phone" prefWidth="120"/>
+                            <TableColumn fx:id="carrEmailColumn" text="Email" prefWidth="150"/>
+                            <TableColumn fx:id="carrRatingColumn" text="Rating" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+            
+            <!-- Orders Tab -->
+            <Tab text="📋 Orders" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <HBox spacing="10">
+                        <Label text="Filter:" styleClass="field-label"/>
+                        <ComboBox fx:id="orderFilterCombo" onAction="#handleFilterOrders"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="totalSalesLabel" text="Total Sales: $0.00" styleClass="sales-label"/>
+                        <Button text="Refresh" onAction="#handleRefreshOrders" styleClass="secondary-button"/>
+                    </HBox>
+                    
+                    <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="ordIdColumn" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="ordCustomerColumn" text="Customer" prefWidth="100"/>
+                            <TableColumn fx:id="ordDateColumn" text="Order Date" prefWidth="130"/>
+                            <TableColumn fx:id="ordDeliveryColumn" text="Delivery" prefWidth="130"/>
+                            <TableColumn fx:id="ordStatusColumn" text="Status" prefWidth="80"/>
+                            <TableColumn fx:id="ordCarrierColumn" text="Carrier" prefWidth="80"/>
+                            <TableColumn fx:id="ordTotalColumn" text="Total" prefWidth="80"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+            
+            <!-- Messages Tab -->
+            <Tab text="💬 Messages" closable="false">
+                <HBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <!-- Message List -->
+                    <VBox spacing="10" HBox.hgrow="ALWAYS">
+                        <Label text="Customer Messages" styleClass="section-title"/>
+                        <ListView fx:id="messagesList" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                    
+                    <!-- Message Detail/Reply -->
+                    <VBox spacing="10" prefWidth="400">
+                        <Label text="Message Details" styleClass="section-title"/>
+                        <TextArea fx:id="messageContentArea" editable="false" prefRowCount="6" promptText="Select a message..."/>
+                        <Label text="Your Reply:" styleClass="field-label"/>
+                        <TextArea fx:id="replyArea" prefRowCount="4" promptText="Type your reply..."/>
+                        <Button text="Send Reply" onAction="#handleSendReply" styleClass="primary-button" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+            </Tab>
+            
+            <!-- Coupons Tab -->
+            <Tab text="🎫 Coupons" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <HBox spacing="10">
+                        <Button text="Create Coupon" onAction="#handleCreateCoupon" styleClass="primary-button"/>
+                        <Button text="Deactivate Selected" onAction="#handleDeactivateCoupon" styleClass="danger-button"/>
+                        <Button text="Assign to Customer" onAction="#handleAssignCoupon" styleClass="secondary-button"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Refresh" onAction="#handleRefreshCoupons" styleClass="secondary-button"/>
+                    </HBox>
+                    
+                    <TableView fx:id="couponsTable" VBox.vgrow="SOMETIMES" prefHeight="200">
+                        <columns>
+                            <TableColumn fx:id="coupIdColumn" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="coupCodeColumn" text="Code" prefWidth="120"/>
+                            <TableColumn fx:id="coupDiscountColumn" text="Discount %" prefWidth="80"/>
+                            <TableColumn fx:id="coupMinColumn" text="Min Order" prefWidth="80"/>
+                            <TableColumn fx:id="coupExpiryColumn" text="Expiry Date" prefWidth="100"/>
+                            <TableColumn fx:id="coupActiveColumn" text="Active" prefWidth="60"/>
+                        </columns>
+                    </TableView>
+                    
+                    <Separator/>
+                    
+                    <!-- Loyalty Settings -->
+                    <Label text="Loyalty Discount Settings" styleClass="section-title"/>
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Label text="Orders Required:"/>
+                        <TextField fx:id="loyaltyOrdersField" prefWidth="80"/>
+                        <Label text="Discount %:"/>
+                        <TextField fx:id="loyaltyDiscountField" prefWidth="80"/>
+                        <Button text="Save Settings" onAction="#handleSaveLoyalty" styleClass="primary-button"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+            
+            <!-- Ratings Tab -->
+            <Tab text="⭐ Ratings" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <Label text="Carrier Ratings" styleClass="section-title"/>
+                    <TableView fx:id="ratingsTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="rateCarrierColumn" text="Carrier" prefWidth="120"/>
+                            <TableColumn fx:id="rateCustomerColumn" text="Customer" prefWidth="120"/>
+                            <TableColumn fx:id="rateOrderColumn" text="Order #" prefWidth="80"/>
+                            <TableColumn fx:id="rateStarsColumn" text="Rating" prefWidth="100"/>
+                            <TableColumn fx:id="rateCommentColumn" text="Comment" prefWidth="250"/>
+                            <TableColumn fx:id="rateDateColumn" text="Date" prefWidth="130"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+            
+            <!-- Reports Tab -->
+            <Tab text="📊 Reports" closable="false">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <HBox spacing="15">
+                        <Button text="Refresh Charts" onAction="#handleRefreshCharts" styleClass="primary-button"/>
+                    </HBox>
+                    
+                    <HBox spacing="20" VBox.vgrow="ALWAYS">
+                        <!-- Sales by Product Chart -->
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Sales by Product" styleClass="section-title"/>
+                            <BarChart fx:id="productSalesChart" VBox.vgrow="ALWAYS">
+                                <xAxis>
+                                    <CategoryAxis label="Product"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Sales ($)"/>
+                                </yAxis>
+                            </BarChart>
+                        </VBox>
+                        
+                        <!-- Product Distribution Chart -->
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Product Distribution" styleClass="section-title"/>
+                            <PieChart fx:id="productDistributionChart" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </Tab>
+            
+        </TabPane>
+    </center>
+    
+    <!-- Status Bar -->
+    <bottom>
+        <HBox styleClass="status-bar" alignment="CENTER" spacing="20">
+            <padding>
+                <Insets top="8" right="20" bottom="8" left="20"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Owner Dashboard - Manage your store"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

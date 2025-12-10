@@ -1,0 +1,441 @@
+/* 
+ * Group17 GreenGrocer - Application Stylesheet
+ * JavaFX CSS for the Greengrocer Application
+ */
+
+/* ==================== ROOT STYLES ==================== */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f5f6fa;
+}
+
+/* ==================== CONTAINERS ==================== */
+.main-container {
+    -fx-background-color: #f5f6fa;
+}
+
+.login-box, .registration-box {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);
+    -fx-max-width: 450px;
+}
+
+.form-container {
+    -fx-padding: 10px;
+}
+
+/* ==================== TOP BAR ==================== */
+.top-bar {
+    -fx-background-color: linear-gradient(to right, #27ae60, #2ecc71);
+    -fx-padding: 10px 20px;
+}
+
+.brand-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.username-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* ==================== TYPOGRAPHY ==================== */
+.app-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #27ae60;
+}
+
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.page-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 5px 0;
+}
+
+.field-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.small-text {
+    -fx-font-size: 11px;
+    -fx-text-fill: #95a5a6;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.text-field, .password-field {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 5;
+    -fx-padding: 10px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 5;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-background-color: white;
+    -fx-border-color: #27ae60;
+    -fx-border-width: 2;
+}
+
+.text-area {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 5;
+    -fx-padding: 5px;
+}
+
+.search-field {
+    -fx-background-color: rgba(255,255,255,0.9);
+    -fx-background-radius: 20;
+    -fx-padding: 8px 15px;
+}
+
+.quantity-field {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 3;
+    -fx-padding: 5px;
+    -fx-pref-width: 50px;
+}
+
+/* ==================== BUTTONS ==================== */
+.button {
+    -fx-background-radius: 5;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.primary-button:hover {
+    -fx-background-color: #219a52;
+}
+
+.secondary-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.danger-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+.danger-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+.icon-button {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 5px 10px;
+}
+
+.cart-button {
+    -fx-background-color: #f39c12;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8px 15px;
+}
+
+.cart-button:hover {
+    -fx-background-color: #e67e22;
+}
+
+.add-button {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 5px 10px;
+}
+
+.menu-button {
+    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-text-fill: white;
+}
+
+/* ==================== PRODUCT CARDS ==================== */
+.product-section {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+}
+
+.products-container {
+    -fx-background-color: #f8f9fa;
+}
+
+.product-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-padding: 10px;
+}
+
+.product-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(39,174,96,0.3), 15, 0, 0, 3);
+}
+
+.product-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2c3e50;
+}
+
+.product-price {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #27ae60;
+}
+
+.product-stock {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.threshold-warning {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+/* ==================== STATUS BAR ==================== */
+.status-bar {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 8px 20px;
+}
+
+.loyalty-label {
+    -fx-font-weight: bold;
+}
+
+/* ==================== SHOPPING CART ==================== */
+.cart-content {
+    -fx-background-color: white;
+}
+
+.cart-summary {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 15px;
+    -fx-background-radius: 8;
+}
+
+.summary-label {
+    -fx-font-size: 14px;
+}
+
+.summary-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.discount-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #27ae60;
+}
+
+.total-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.total-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #27ae60;
+}
+
+.button-bar {
+    -fx-background-color: #f8f9fa;
+}
+
+/* ==================== CARRIER INTERFACE ==================== */
+.carrier-content {
+    -fx-background-color: #f5f6fa;
+}
+
+.order-section {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 15px;
+}
+
+.rating-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #f39c12;
+}
+
+/* ==================== OWNER INTERFACE ==================== */
+.owner-tabs {
+    -fx-background-color: white;
+}
+
+.owner-tabs .tab-header-area {
+    -fx-background-color: #ecf0f1;
+}
+
+.owner-tabs .tab {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 5 5 0 0;
+}
+
+.owner-tabs .tab:selected {
+    -fx-background-color: white;
+}
+
+.owner-tabs .tab .tab-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.sales-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #27ae60;
+}
+
+/* ==================== TABLES ==================== */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #ecf0f1;
+}
+
+.table-view .column-header {
+    -fx-background-color: #27ae60;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #d5f5e3;
+}
+
+/* ==================== LIST VIEWS ==================== */
+.list-view {
+    -fx-background-color: white;
+    -fx-border-color: #ecf0f1;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #d5f5e3;
+}
+
+/* ==================== SCROLL PANES ==================== */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-scroll {
+    -fx-background-color: #f5f6fa;
+}
+
+/* ==================== TITLED PANES ==================== */
+.titled-pane {
+    -fx-background-color: white;
+}
+
+.titled-pane > .title {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.titled-pane > .title > .text {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-fill: white;
+}
+
+/* ==================== ERROR/WARNING LABELS ==================== */
+.error-label {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}
+
+.warning-label {
+    -fx-text-fill: #e67e22;
+    -fx-font-weight: bold;
+}
+
+/* ==================== HYPERLINKS ==================== */
+.hyperlink {
+    -fx-text-fill: #3498db;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #2980b9;
+}
+
+/* ==================== CHARTS ==================== */
+.chart {
+    -fx-background-color: white;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+/* ==================== DIALOGS ==================== */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-background-color: #f8f9fa;
+}
+
+/* ==================== COMBO BOXES ==================== */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 3;
+}
+
+/* ==================== DATE PICKER ==================== */
+.date-picker {
+    -fx-background-color: white;
+}
+
+/* ==================== TAB PANE ==================== */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #ecf0f1;
+}
+
+/* ==================== SEPARATORS ==================== */
+.separator {
+    -fx-background-color: #ecf0f1;
+}
