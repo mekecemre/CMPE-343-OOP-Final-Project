@@ -17,8 +17,8 @@ Project3/
 │       ├── utils/              # Utility classes
 │       ├── views/              # FXML files
 │       └── styles/             # CSS stylesheets
-├── lib/                        # Required JAR libraries (add these)
-│   ├── javafx-sdk-21/         # JavaFX SDK
+├── lib/                        # Required JAR libraries
+│   ├── javafx-sdk-21.0.9/     # JavaFX SDK (download for your OS, not tracked in git)
 │   └── mysql-connector-j-8.0.33.jar
 └── README.md
 ```
@@ -26,11 +26,35 @@ Project3/
 ## Prerequisites
 
 1. **Java JDK 21** (or compatible version with JavaFX)
-2. **JavaFX SDK 21** - Download from https://openjfx.io/
-3. **MySQL Server 8.0+**
-4. **MySQL Connector/J** - Download from https://dev.mysql.com/downloads/connector/j/
+2. **JavaFX SDK 21** - Download the platform-specific SDK:
+   - **Windows**: [JavaFX 21.0.1 Windows SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-sdk.zip)
+   - **Linux**: [JavaFX 21.0.1 Linux SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-sdk.zip)
+   - **macOS**: [JavaFX 21.0.1 macOS SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-x64_bin-sdk.zip)
+   - Or download from: https://openjfx.io/
+3. **MySQL Server 8.0+** (or MariaDB)
+4. **MySQL Connector/J 8.0.33** - Already included in `lib/mysql-connector-j-8.0.33.jar`
 
-## Database Setup
+## Setup Instructions
+
+### 1. JavaFX SDK Setup
+
+Download the JavaFX SDK for your operating system (see Prerequisites) and extract it to the `lib/` directory:
+
+**Example structure after extraction:**
+```
+lib/
+├── javafx-sdk-21.0.9/
+│   └── lib/
+│       ├── javafx.base.jar
+│       ├── javafx.controls.jar
+│       ├── javafx.fxml.jar
+│       └── ... (platform-specific native libraries)
+└── mysql-connector-j-8.0.33.jar
+```
+
+**Note:** The JavaFX SDK is platform-specific (contains `.dll` for Windows, `.so` for Linux, `.dylib` for macOS). Each developer must download the SDK for their own operating system. The SDK is not tracked in git.
+
+### 2. Database Setup
 
 1. Start MySQL Server
 2. Login to MySQL:
@@ -44,26 +68,56 @@ Project3/
    FLUSH PRIVILEGES;
    ```
 4. Run the schema script:
-   ```
+   ```bash
+   # MySQL
    mysql -u myuser -p1234 < sql/schema.sql
+   
+   # Or MariaDB
+   mariadb -u myuser -p1234 < sql/schema.sql
    ```
 
 ## Compilation Instructions
 
-### Step 1: Set Environment Variables
+### Using Build Scripts (Recommended)
+
+**Linux/macOS:**
+```bash
+./build.sh
+./run.sh
+```
+
+**Windows:**
+```cmd
+build.bat
+run.bat
+```
+
+The build and run scripts are pre-configured to use the JavaFX SDK from `lib/javafx-sdk-21.0.9/` and the MySQL connector.
+
+### Manual Compilation (Alternative)
+
+If you prefer to compile manually or need to customize paths:
+
+**Step 1: Set Environment Variables**
 
 Set the path to your JavaFX SDK:
 
 **Windows (PowerShell):**
 ```powershell
-$env:PATH_TO_FX = "C:\path\to\javafx-sdk-21\lib"
-$env:MYSQL_JAR = "C:\path\to\mysql-connector-j-8.0.33.jar"
+$env:PATH_TO_FX = "lib\javafx-sdk-21.0.9\lib"
+$env:MYSQL_JAR = "lib\mysql-connector-j-8.0.33.jar"
 ```
 
 **Windows (Command Prompt):**
 ```cmd
-set PATH_TO_FX=C:\path\to\javafx-sdk-21\lib
-set MYSQL_JAR=C:\path\to\mysql-connector-j-8.0.33.jar
+set PATH_TO_FX=lib\javafx-sdk-21.0.9\lib
+set MYSQL_JAR=lib\mysql-connector-j-8.0.33.jar
+```
+
+**Linux/macOS (Bash):**
+```bash
+export PATH_TO_FX="lib/javafx-sdk-21.0.9/lib"
+export MYSQL_JAR="lib/mysql-connector-j-8.0.33.jar"
 ```
 
 ### Step 2: Compile the Source Files
@@ -178,10 +232,28 @@ javadoc -d docs --module-path $env:PATH_TO_FX --add-modules javafx.controls,java
 
 ## Troubleshooting
 
-1. **Database Connection Error**: Ensure MySQL is running and user credentials are correct
-2. **ClassNotFoundException**: Verify MySQL Connector JAR is in classpath
-3. **FXML Load Error**: Ensure resources are copied to output directory
-4. **JavaFX Error**: Verify JavaFX SDK path is correct
+1. **Graphics Device initialization failed / No suitable pipeline found**:
+   - You're using the wrong JavaFX SDK for your operating system
+   - Download the correct platform-specific SDK (Windows/Linux/macOS)
+   - Ensure the SDK is extracted to `lib/javafx-sdk-21.0.9/`
+   - Linux: May need to install `libgtk-3-0` and OpenGL libraries
+
+2. **Database Connection Error**: 
+   - Ensure MySQL/MariaDB is running: `systemctl status mysql` or `systemctl status mariadb`
+   - Verify user credentials are correct (myuser/1234)
+   - Check if user has permissions: `GRANT ALL PRIVILEGES ON greengrocer.* TO 'myuser'@'localhost';`
+
+3. **ClassNotFoundException**: 
+   - Verify MySQL Connector JAR is in `lib/` directory
+   - Check build script is including it in classpath
+
+4. **FXML Load Error**: 
+   - Ensure resources are copied to output directory
+   - Check that `src/com/greengrocer/views/` and `styles/` exist
+
+5. **JavaFX Module Error**: 
+   - Verify JavaFX SDK path is correct in build/run scripts
+   - Ensure you're using Java 11 or later
 
 ## Authors
 
