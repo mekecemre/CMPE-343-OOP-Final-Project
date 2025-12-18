@@ -7,7 +7,7 @@ A complete desktop application for a Local Greengrocer built with JavaFX and JDB
 ```
 Project3/
 ├── sql/
-│   └── schema.sql              # Database schema and initial data
+│   └── Group17.sql             # Database schema and initial data
 ├── src/
 │   └── com/greengrocer/
 │       ├── Main.java           # Application entry point
@@ -70,10 +70,10 @@ lib/
 4. Run the schema script:
    ```bash
    # MySQL
-   mysql -u myuser -p1234 < sql/schema.sql
+   mysql -u myuser -p1234 < sql/Group17.sql
    
    # Or MariaDB
-   mariadb -u myuser -p1234 < sql/schema.sql
+   mariadb -u myuser -p1234 < sql/Group17.sql
    ```
 
 ## Compilation Instructions
