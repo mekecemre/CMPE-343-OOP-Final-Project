@@ -7,10 +7,13 @@ REM Change to the script's directory
 cd /d "%~dp0"
 
 REM Set path to JavaFX SDK lib folder
-set "PATH_TO_FX=%~dp0lib\javafx-sdk-21.0.9\lib"
+set "PATH_TO_FX=%~dp0lib\javafx-sdk-25.0.1\lib"
 
 REM Set path to MySQL Connector JAR
 set "MYSQL_JAR=%~dp0lib\mysql-connector-j-8.0.33.jar"
+
+REM Set path to iTextPDF JAR
+set "ITEXT_JAR=%~dp0lib\itextpdf-5.5.13.3.jar"
 
 REM Project directories
 set "SRC_DIR=%~dp0src"
@@ -50,7 +53,7 @@ for /r "%SRC_DIR%" %%f in (*.java) do (
     set "JAVA_FILES=!JAVA_FILES! "%%f""
 )
 
-javac --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics -cp "%MYSQL_JAR%" -d "%OUT_DIR%" %JAVA_FILES%
+javac --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics -cp "%MYSQL_JAR%;%ITEXT_JAR%" -d "%OUT_DIR%" %JAVA_FILES%
 endlocal
 
 if errorlevel 1 (

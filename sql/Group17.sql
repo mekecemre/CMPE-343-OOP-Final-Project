@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS ProductInfo (
 
 -- ============================================
 -- ORDER INFO TABLE
--- Stores customer orders with invoice as CLOB
+-- Stores customer orders with invoice as CLOB and PDF as BLOB
 -- ============================================
 CREATE TABLE IF NOT EXISTS OrderInfo (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS OrderInfo (
     discount DOUBLE DEFAULT 0,
     total_cost DOUBLE NOT NULL,
     invoice LONGTEXT,
+    invoice_pdf LONGBLOB,
     FOREIGN KEY (user_id) REFERENCES UserInfo(id),
     FOREIGN KEY (carrier_id) REFERENCES UserInfo(id)
 );

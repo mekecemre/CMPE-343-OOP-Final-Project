@@ -4,6 +4,7 @@ import com.greengrocer.database.UserDAO;
 import com.greengrocer.models.User;
 import com.greengrocer.utils.AlertUtils;
 import com.greengrocer.utils.SceneNavigator;
+import com.greengrocer.utils.ValidationUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -83,8 +84,10 @@ public class RegistrationController {
             return;
         }
 
-        if (password.isEmpty()) {
-            showError("Password is required.");
+        // Validate password strength
+        String passwordError = ValidationUtils.getPasswordError(password);
+        if (passwordError != null) {
+            showError(passwordError);
             return;
         }
 

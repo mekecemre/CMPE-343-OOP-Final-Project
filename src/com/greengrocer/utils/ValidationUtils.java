@@ -146,4 +146,111 @@ public class ValidationUtils {
     public static String formatQuantity(double quantity) {
         return String.format("%.2f kg", quantity);
     }
+
+    /**
+     * Validates password strength.
+     * Password must be at least 8 characters, contain uppercase, lowercase, and a
+     * number.
+     * 
+     * @param password The password to validate
+     * @return true if password meets all requirements
+     */
+    public static boolean isStrongPassword(String password) {
+        if (!isNotEmpty(password)) {
+            return false;
+        }
+
+        // Minimum 8 characters
+        if (password.length() < 8) {
+            return false;
+        }
+
+        // Check for uppercase letter
+        boolean hasUppercase = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                hasUppercase = true;
+                break;
+            }
+        }
+        if (!hasUppercase) {
+            return false;
+        }
+
+        // Check for lowercase letter
+        boolean hasLowercase = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isLowerCase(c)) {
+                hasLowercase = true;
+                break;
+            }
+        }
+        if (!hasLowercase) {
+            return false;
+        }
+
+        // Check for digit
+        boolean hasDigit = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+                break;
+            }
+        }
+        if (!hasDigit) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets a message describing password requirements.
+     * 
+     * @return Password requirements description
+     */
+    public static String getPasswordRequirements() {
+        return "Password must be at least 8 characters with uppercase, lowercase, and a number.";
+    }
+
+    /**
+     * Gets detailed password validation error message.
+     * 
+     * @param password The password to check
+     * @return Error message or null if valid
+     */
+    public static String getPasswordError(String password) {
+        if (!isNotEmpty(password)) {
+            return "Password is required.";
+        }
+
+        if (password.length() < 8) {
+            return "Password must be at least 8 characters long.";
+        }
+
+        boolean hasUppercase = false;
+        boolean hasLowercase = false;
+        boolean hasDigit = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c))
+                hasUppercase = true;
+            if (Character.isLowerCase(c))
+                hasLowercase = true;
+            if (Character.isDigit(c))
+                hasDigit = true;
+        }
+
+        if (!hasUppercase) {
+            return "Password must contain at least one uppercase letter.";
+        }
+        if (!hasLowercase) {
+            return "Password must contain at least one lowercase letter.";
+        }
+        if (!hasDigit) {
+            return "Password must contain at least one number.";
+        }
+
+        return null; // Password is valid
+    }
 }

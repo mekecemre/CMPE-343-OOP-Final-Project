@@ -379,10 +379,15 @@ public class ShoppingCartController {
             order.addItem(orderItem);
         }
 
-        // Generate invoice
+        // Generate text invoice
         String invoice = InvoiceGenerator.generateInvoice(order, currentUser,
                 cartManager.getItems(), appliedDiscountPercent);
         order.setInvoice(invoice);
+
+        // Generate PDF invoice
+        byte[] pdfInvoice = PdfInvoiceGenerator.generatePdfInvoice(order, currentUser,
+                cartManager.getItems(), appliedDiscountPercent);
+        order.setInvoicePdf(pdfInvoice);
 
         // Save order
         int orderId = orderDAO.create(order);

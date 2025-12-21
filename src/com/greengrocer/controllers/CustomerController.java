@@ -406,20 +406,31 @@ public class CustomerController {
                         viewBtn.setOnAction(e -> showInvoice(order));
                         actions.getChildren().add(viewBtn);
 
-                        // Cancel button (only for pending orders)
+                        // Cancel button (only for pending orders within 24 hour time limit)
                         if (order.isPending()) {
-                            Button cancelBtn = new Button("Cancel");
-                            cancelBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
-                            cancelBtn.setOnAction(e -> {
-                                if (AlertUtils.showConfirmation("Cancel Order",
-                                        "Are you sure you want to cancel this order?")) {
-                                    if (orderDAO.cancelOrder(order.getId())) {
-                                        AlertUtils.showSuccess("Order cancelled successfully.");
-                                        orderList.getItems().remove(order);
+                            if (orderDAO.canCancelOrder(order.getId())) {
+                                int hoursRemaining = orderDAO.getHoursRemainingToCancel(order.getId());
+                                Button cancelBtn = new Button("Cancel (" + hoursRemaining + "h left)");
+                                cancelBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
+                                cancelBtn.setOnAction(e -> {
+                                    if (AlertUtils.showConfirmation("Cancel Order",
+                                            "Are you sure you want to cancel this order?\n" +
+                                                    "You have " + hoursRemaining + " hour(s) remaining to cancel.")) {
+                                        if (orderDAO.cancelOrder(order.getId())) {
+                                            AlertUtils.showSuccess("Order cancelled successfully.");
+                                            orderList.getItems().remove(order);
+                                        } else {
+                                            AlertUtils.showError("Cannot Cancel",
+                                                    "Order cannot be cancelled. The 24-hour cancellation window has expired.");
+                                        }
                                     }
-                                }
-                            });
-                            actions.getChildren().add(cancelBtn);
+                                });
+                                actions.getChildren().add(cancelBtn);
+                            } else {
+                                Label expiredLabel = new Label("Cancellation expired");
+                                expiredLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 10px;");
+                                actions.getChildren().add(expiredLabel);
+                            }
                         }
 
                         // Rate button (only for delivered orders)
@@ -447,7 +458,7 @@ public class CustomerController {
     }
 
     /**
-     * Shows the invoice for an order.
+     * Shows the invoice for an order with option to save as PDF.
      */
     private void showInvoice(Order order) {
         String invoice = order.getInvoice();
@@ -457,15 +468,47 @@ public class CustomerController {
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Invoice #" + order.getId());
-        alert.setHeaderText(null);
+        alert.setHeaderText("Order Invoice - Click 'Save PDF' to download");
+
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(10));
 
         TextArea textArea = new TextArea(invoice);
         textArea.setEditable(false);
         textArea.setWrapText(true);
-        textArea.setPrefSize(500, 400);
+        textArea.setPrefSize(500, 350);
         textArea.setStyle("-fx-font-family: 'Courier New', monospace;");
 
-        alert.getDialogPane().setContent(textArea);
+        Button savePdfBtn = new Button("Save PDF Invoice");
+        savePdfBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
+
+        final Order orderFinal = order;
+        savePdfBtn.setOnAction(e -> {
+            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+            fileChooser.setTitle("Save Invoice as PDF");
+            fileChooser.setInitialFileName("Invoice_" + orderFinal.getId() + ".pdf");
+            fileChooser.getExtensionFilters().add(
+                    new javafx.stage.FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+
+            java.io.File file = fileChooser.showSaveDialog(alert.getDialogPane().getScene().getWindow());
+            if (file != null) {
+                try {
+                    byte[] pdfData = orderFinal.getInvoicePdf();
+                    if (pdfData == null || pdfData.length == 0) {
+                        // Generate PDF if not stored
+                        pdfData = PdfInvoiceGenerator.generatePdfFromOrder(orderFinal);
+                    }
+                    java.nio.file.Files.write(file.toPath(), pdfData);
+                    AlertUtils.showSuccess("PDF saved successfully to:\n" + file.getAbsolutePath());
+                } catch (Exception ex) {
+                    AlertUtils.showError("Save Failed", "Could not save PDF: " + ex.getMessage());
+                }
+            }
+        });
+
+        content.getChildren().addAll(textArea, savePdfBtn);
+
+        alert.getDialogPane().setContent(content);
         alert.showAndWait();
     }
 

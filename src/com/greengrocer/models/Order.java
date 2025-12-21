@@ -58,6 +58,9 @@ public class Order {
     /** Invoice stored as text (CLOB) */
     private String invoice;
 
+    /** Invoice stored as PDF (BLOB) */
+    private byte[] invoicePdf;
+
     /** List of items in this order */
     private List<OrderItem> items;
 
@@ -151,6 +154,10 @@ public class Order {
         return invoice;
     }
 
+    public byte[] getInvoicePdf() {
+        return invoicePdf;
+    }
+
     public List<OrderItem> getItems() {
         return items;
     }
@@ -215,6 +222,10 @@ public class Order {
 
     public void setInvoice(String invoice) {
         this.invoice = invoice;
+    }
+
+    public void setInvoicePdf(byte[] invoicePdf) {
+        this.invoicePdf = invoicePdf;
     }
 
     public void setItems(List<OrderItem> items) {

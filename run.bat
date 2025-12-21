@@ -6,10 +6,13 @@ REM Change to the script's directory
 cd /d "%~dp0"
 
 REM Set path to JavaFX SDK lib folder
-set "PATH_TO_FX=%~dp0lib\javafx-sdk-21.0.9\lib"
+set "PATH_TO_FX=%~dp0lib\javafx-sdk-25.0.1\lib"
 
 REM Set path to MySQL Connector JAR
 set "MYSQL_JAR=%~dp0lib\mysql-connector-j-8.0.33.jar"
+
+REM Set path to iTextPDF JAR
+set "ITEXT_JAR=%~dp0lib\itextpdf-5.5.13.3.jar"
 
 REM Output directory
 set "OUT_DIR=%~dp0out"
@@ -28,7 +31,7 @@ if not exist "%OUT_DIR%" (
 )
 
 echo Starting application...
-java --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics --enable-native-access=javafx.graphics -cp "%OUT_DIR%;%MYSQL_JAR%" com.greengrocer.Main
+java --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics --enable-native-access=javafx.graphics -cp "%OUT_DIR%;%MYSQL_JAR%;%ITEXT_JAR%" com.greengrocer.Main
 
 if errorlevel 1 (
     echo.

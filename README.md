@@ -18,21 +18,23 @@ Project3/
 │       ├── views/              # FXML files
 │       └── styles/             # CSS stylesheets
 ├── lib/                        # Required JAR libraries
-│   ├── javafx-sdk-21.0.9/     # JavaFX SDK (download for your OS, not tracked in git)
-│   └── mysql-connector-j-8.0.33.jar
+│   ├── javafx-sdk-25.0.1/     # JavaFX SDK (download for your OS, not tracked in git)
+│   ├── mysql-connector-j-8.0.33.jar
+│   └── itextpdf-5.5.13.3.jar  # PDF generation library
 └── README.md
 ```
 
 ## Prerequisites
 
 1. **Java JDK 21** (or compatible version with JavaFX)
-2. **JavaFX SDK 21** - Download the platform-specific SDK:
-   - **Windows**: [JavaFX 21.0.1 Windows SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-sdk.zip)
-   - **Linux**: [JavaFX 21.0.1 Linux SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_linux-x64_bin-sdk.zip)
-   - **macOS**: [JavaFX 21.0.1 macOS SDK](https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-x64_bin-sdk.zip)
+2. **JavaFX SDK 25** - Download the platform-specific SDK:
+   - **Windows**: [JavaFX 25.0.1 Windows SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_windows-x64_bin-sdk.zip)
+   - **Linux**: [JavaFX 25.0.1 Linux SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_linux-x64_bin-sdk.zip)
+   - **macOS**: [JavaFX 25.0.1 macOS SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_osx-aarch64_bin-sdk.zip)
    - Or download from: https://openjfx.io/
 3. **MySQL Server 8.0+** (or MariaDB)
 4. **MySQL Connector/J 8.0.33** - Already included in `lib/mysql-connector-j-8.0.33.jar`
+5. **iTextPDF 5.5.13.3** - Already included in `lib/itextpdf-5.5.13.3.jar` (for PDF invoice generation)
 
 ## Setup Instructions
 
@@ -43,13 +45,14 @@ Download the JavaFX SDK for your operating system (see Prerequisites) and extrac
 **Example structure after extraction:**
 ```
 lib/
-├── javafx-sdk-21.0.9/
+├── javafx-sdk-25.0.1/
 │   └── lib/
 │       ├── javafx.base.jar
 │       ├── javafx.controls.jar
 │       ├── javafx.fxml.jar
 │       └── ... (platform-specific native libraries)
-└── mysql-connector-j-8.0.33.jar
+├── mysql-connector-j-8.0.33.jar
+└── itextpdf-5.5.13.3.jar
 ```
 
 **Note:** The JavaFX SDK is platform-specific (contains `.dll` for Windows, `.so` for Linux, `.dylib` for macOS). Each developer must download the SDK for their own operating system. The SDK is not tracked in git.

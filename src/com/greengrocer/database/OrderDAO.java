@@ -33,9 +33,9 @@ public class OrderDAO {
      * @return The created order ID, or -1 if failed
      */
     public int create(Order order) {
-        String query = "INSERT INTO OrderInfo (user_id, requested_delivery, status, subtotal, vat, discount, total_cost, invoice) "
+        String query = "INSERT INTO OrderInfo (user_id, requested_delivery, status, subtotal, vat, discount, total_cost, invoice, invoice_pdf) "
                 +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement stmt = db.prepareStatementWithKeys(query);
@@ -47,6 +47,7 @@ public class OrderDAO {
             stmt.setDouble(6, order.getDiscount());
             stmt.setDouble(7, order.getTotalCost());
             stmt.setString(8, order.getInvoice());
+            stmt.setBytes(9, order.getInvoicePdf());
 
             int rows = stmt.executeUpdate();
 
@@ -330,13 +331,16 @@ public class OrderDAO {
     }
 
     /**
-     * Cancels an order.
+     * Cancels an order within allowed time frame (24 hours from order placement).
      * 
      * @param orderId The order ID
      * @return true if successful
      */
     public boolean cancelOrder(int orderId) {
-        String query = "UPDATE OrderInfo SET status = 'CANCELLED' WHERE id = ? AND status = 'PENDING'";
+        // Only allow cancellation within 24 hours of order placement
+        String query = "UPDATE OrderInfo SET status = 'CANCELLED' " +
+                "WHERE id = ? AND status = 'PENDING' " +
+                "AND TIMESTAMPDIFF(HOUR, order_time, NOW()) <= 24";
 
         try {
             PreparedStatement stmt = db.prepareStatement(query);
@@ -349,6 +353,61 @@ public class OrderDAO {
             System.err.println("Cancel order error: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Checks if an order can still be cancelled (within 24 hours).
+     * 
+     * @param orderId The order ID
+     * @return true if the order can be cancelled
+     */
+    public boolean canCancelOrder(int orderId) {
+        String query = "SELECT TIMESTAMPDIFF(HOUR, order_time, NOW()) as hours_since " +
+                "FROM OrderInfo WHERE id = ? AND status = 'PENDING'";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setInt(1, orderId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int hoursSince = rs.getInt("hours_since");
+                return hoursSince <= 24;
+            }
+        } catch (SQLException e) {
+            System.err.println("Check cancel order error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the hours remaining to cancel an order.
+     * 
+     * @param orderId The order ID
+     * @return Hours remaining, or -1 if cannot be cancelled
+     */
+    public int getHoursRemainingToCancel(int orderId) {
+        String query = "SELECT TIMESTAMPDIFF(HOUR, order_time, NOW()) as hours_since " +
+                "FROM OrderInfo WHERE id = ? AND status = 'PENDING'";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setInt(1, orderId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int hoursSince = rs.getInt("hours_since");
+                int remaining = 24 - hoursSince;
+                return remaining > 0 ? remaining : 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Get hours remaining error: " + e.getMessage());
+        }
+
+        return -1;
     }
 
     /**
@@ -530,6 +589,13 @@ public class OrderDAO {
         order.setDiscount(rs.getDouble("discount"));
         order.setTotalCost(rs.getDouble("total_cost"));
         order.setInvoice(rs.getString("invoice"));
+
+        // Try to get PDF invoice (may not exist in all queries)
+        try {
+            order.setInvoicePdf(rs.getBytes("invoice_pdf"));
+        } catch (SQLException e) {
+            // Column may not exist in all queries, ignore
+        }
 
         return order;
     }
