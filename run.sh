@@ -9,10 +9,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 
 # Set path to JavaFX SDK lib folder
-PATH_TO_FX="$SCRIPT_DIR/lib/javafx-sdk-21.0.9/lib"
+PATH_TO_FX="$SCRIPT_DIR/lib/javafx-sdk-25.0.1/lib"
 
 # Set path to MySQL Connector JAR
 MYSQL_JAR="$SCRIPT_DIR/lib/mysql-connector-j-8.0.33.jar"
+
+# Set path to iTextPDF JAR
+ITEXT_JAR="$SCRIPT_DIR/lib/itextpdf-5.5.13.3.jar"
 
 # Output directory
 OUT_DIR="$SCRIPT_DIR/out"
@@ -33,7 +36,7 @@ echo "Starting application..."
 java --module-path "$PATH_TO_FX" \
      --add-modules javafx.controls,javafx.fxml,javafx.graphics \
      --enable-native-access=javafx.graphics \
-     -cp "$OUT_DIR:$MYSQL_JAR" \
+     -cp "$OUT_DIR:$MYSQL_JAR:$ITEXT_JAR" \
      com.greengrocer.Main
 
 if [ $? -ne 0 ]; then

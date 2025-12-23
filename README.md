@@ -95,7 +95,7 @@ build.bat
 run.bat
 ```
 
-The build and run scripts are pre-configured to use the JavaFX SDK from `lib/javafx-sdk-21.0.9/` and the MySQL connector.
+The build and run scripts are pre-configured to use the JavaFX SDK from `lib/javafx-sdk-25.0.1/` and the MySQL connector.
 
 ### Manual Compilation (Alternative)
 
@@ -107,19 +107,19 @@ Set the path to your JavaFX SDK:
 
 **Windows (PowerShell):**
 ```powershell
-$env:PATH_TO_FX = "lib\javafx-sdk-21.0.9\lib"
+$env:PATH_TO_FX = "lib\javafx-sdk-25.0.1\lib"
 $env:MYSQL_JAR = "lib\mysql-connector-j-8.0.33.jar"
 ```
 
 **Windows (Command Prompt):**
 ```cmd
-set PATH_TO_FX=lib\javafx-sdk-21.0.9\lib
+set PATH_TO_FX=lib\javafx-sdk-25.0.1\lib
 set MYSQL_JAR=lib\mysql-connector-j-8.0.33.jar
 ```
 
 **Linux/macOS (Bash):**
 ```bash
-export PATH_TO_FX="lib/javafx-sdk-21.0.9/lib"
+export PATH_TO_FX="lib/javafx-sdk-25.0.1/lib"
 export MYSQL_JAR="lib/mysql-connector-j-8.0.33.jar"
 ```
 
@@ -238,7 +238,7 @@ javadoc -d docs --module-path $env:PATH_TO_FX --add-modules javafx.controls,java
 1. **Graphics Device initialization failed / No suitable pipeline found**:
    - You're using the wrong JavaFX SDK for your operating system
    - Download the correct platform-specific SDK (Windows/Linux/macOS)
-   - Ensure the SDK is extracted to `lib/javafx-sdk-21.0.9/`
+   - Ensure the SDK is extracted to `lib/javafx-sdk-25.0.1/`
    - Linux: May need to install `libgtk-3-0` and OpenGL libraries
 
 2. **Database Connection Error**: 
