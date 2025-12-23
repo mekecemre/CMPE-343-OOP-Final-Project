@@ -53,7 +53,7 @@ for /r "%SRC_DIR%" %%f in (*.java) do (
     set "JAVA_FILES=!JAVA_FILES! "%%f""
 )
 
-javac --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics -cp "%MYSQL_JAR%;%ITEXT_JAR%" -d "%OUT_DIR%" %JAVA_FILES%
+javac -encoding UTF-8 --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml,javafx.graphics -cp "%MYSQL_JAR%;%ITEXT_JAR%" -d "%OUT_DIR%" %JAVA_FILES%
 endlocal
 
 if errorlevel 1 (

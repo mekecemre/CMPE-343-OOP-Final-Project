@@ -52,7 +52,8 @@ echo "[2/3] Compiling Java sources..."
 # Find all Java files and compile them
 find "$SRC_DIR" -name "*.java" > /tmp/sources.txt
 
-javac --module-path "$PATH_TO_FX" \
+javac -encoding UTF-8 \
+      --module-path "$PATH_TO_FX" \
       --add-modules javafx.controls,javafx.fxml,javafx.graphics \
       -cp "$MYSQL_JAR:$ITEXT_JAR" \
       -d "$OUT_DIR" \

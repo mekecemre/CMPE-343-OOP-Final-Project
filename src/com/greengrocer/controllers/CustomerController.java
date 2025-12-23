@@ -102,12 +102,12 @@ public class CustomerController {
         // Load vegetables
         List<Product> vegetables = productDAO.getVegetables();
         displayProducts(vegetablesContainer, vegetables);
-        vegetablesPane.setText("🥕 Vegetables (" + vegetables.size() + ")");
+        vegetablesPane.setText("[V] Vegetables (" + vegetables.size() + ")");
 
         // Load fruits
         List<Product> fruits = productDAO.getFruits();
         displayProducts(fruitsContainer, fruits);
-        fruitsPane.setText("🍎 Fruits (" + fruits.size() + ")");
+        fruitsPane.setText("[F] Fruits (" + fruits.size() + ")");
     }
 
     /**
@@ -256,7 +256,7 @@ public class CustomerController {
      */
     private void updateCartButton() {
         int count = cartManager.getItemCount();
-        cartButton.setText("🛒 Cart (" + count + ")");
+        cartButton.setText("Cart (" + count + ")");
     }
 
     /**
@@ -267,7 +267,7 @@ public class CustomerController {
         int completedOrders = currentUser.getCompletedOrders();
 
         if (settings.isEligible(completedOrders)) {
-            loyaltyLabel.setText(String.format("🌟 Loyalty Member - %.0f%% discount!", settings.getDiscountPercent()));
+            loyaltyLabel.setText(String.format("* Loyalty Member - %.0f%% discount!", settings.getDiscountPercent()));
             loyaltyLabel.setStyle("-fx-text-fill: #27ae60;");
         } else {
             int ordersNeeded = settings.getMinOrdersForDiscount() - completedOrders;
@@ -307,8 +307,8 @@ public class CustomerController {
             }
         }
 
-        vegetablesPane.setText("🥕 Vegetables (" + vegCount + ")");
-        fruitsPane.setText("🍎 Fruits (" + fruitCount + ")");
+        vegetablesPane.setText("[V] Vegetables (" + vegCount + ")");
+        fruitsPane.setText("[F] Fruits (" + fruitCount + ")");
 
         statusLabel.setText("Found " + results.size() + " products for '" + keyword + "'");
     }
@@ -694,7 +694,7 @@ public class CustomerController {
                     String text = msg.getSubject() + "\n" +
                             "Sent: " + msg.getSentAt().toString();
                     if (msg.hasReply()) {
-                        text += "\n✓ Reply: " + msg.getReply();
+                        text += "\n> Reply: " + msg.getReply();
                     }
                     setText(text);
                 }
