@@ -79,7 +79,10 @@ lib/
    FLUSH PRIVILEGES;
    ```
 4. Run the schema script:
-   ```bash
+The SQL file automatically creates the database, user, and all tables. Just run it as the MySQL **root** user:
+
+**Option 1: Command Line**
+```bash
    # MySQL
    mysql -u myuser -p1234 < sql/Group17.sql
    
@@ -87,15 +90,26 @@ lib/
    mariadb -u myuser -p1234 < sql/Group17.sql
    ```
 
-## Compilation Instructions
+   # Run as root user (the SQL file creates 'myuser' automatically)
+   mysql -u root -p < sql/Group17.sql
+   ```
 
-### Using Build Scripts (Recommended)
+   **Option 2: MySQL Workbench / phpMyAdmin**
+   1. Connect as root user
+   2. Open and execute `sql/Group17.sql`
 
-**Linux/macOS:**
-```bash
-./build.sh
-./run.sh
-```
+   > **Note**: The script creates user `myuser` with password `1234`. If you get "Access denied" errors when running the app, make sure you ran the SQL file as **root**, not as myuser.
+
+   ## Compilation Instructions
+
+   ### Using Build Scripts (Recommended)
+
+   **Linux/macOS:**
+   ```bash
+   ./build.sh
+   ./run.sh
+   
+   ```
 
 **Windows:**
 ```cmd
