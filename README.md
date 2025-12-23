@@ -26,12 +26,20 @@ Project3/
 
 ## Prerequisites
 
-1. **Java JDK 21** (or compatible version with JavaFX)
-2. **JavaFX SDK 25** - Download the platform-specific SDK:
-   - **Windows**: [JavaFX 25.0.1 Windows SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_windows-x64_bin-sdk.zip)
-   - **Linux**: [JavaFX 25.0.1 Linux SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_linux-x64_bin-sdk.zip)
-   - **macOS**: [JavaFX 25.0.1 macOS SDK](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_osx-aarch64_bin-sdk.zip)
-   - Or download from: https://openjfx.io/
+1. **Java JDK 21 or higher** (JDK 23 recommended for JavaFX 25)
+   - Check your version: `java -version`
+   - Download JDK: https://adoptium.net/temurin/releases/
+
+2. **JavaFX SDK** - Must match your Java version:
+
+   | Your Java Version | Required JavaFX SDK | Download Link |
+   |-------------------|---------------------|---------------|
+   | Java 23 | JavaFX 25.0.1 | [Windows](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_windows-x64_bin-sdk.zip) / [Linux](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_linux-x64_bin-sdk.zip) / [macOS](https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_osx-aarch64_bin-sdk.zip) |
+   | Java 21 | JavaFX 21.0.5 | [Windows](https://download2.gluonhq.com/openjfx/21.0.5/openjfx-21.0.5_windows-x64_bin-sdk.zip) / [Linux](https://download2.gluonhq.com/openjfx/21.0.5/openjfx-21.0.5_linux-x64_bin-sdk.zip) / [macOS](https://download2.gluonhq.com/openjfx/21.0.5/openjfx-21.0.5_osx-aarch64_bin-sdk.zip) |
+   | Java 17 | JavaFX 21.0.5 | Same as above |
+
+   > **⚠️ IMPORTANT**: If you get "class file has wrong version" errors, your Java and JavaFX versions don't match!
+
 3. **MySQL Server 8.0+** (or MariaDB)
 4. **MySQL Connector/J 8.0.33** - Already included in `lib/mysql-connector-j-8.0.33.jar`
 5. **iTextPDF 5.5.13.3** - Already included in `lib/itextpdf-5.5.13.3.jar` (for PDF invoice generation)
