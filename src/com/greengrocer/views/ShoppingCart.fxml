@@ -4,104 +4,132 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.greengrocer.controllers.ShoppingCartController"
-            styleClass="main-container">
+            styleClass="main-container" prefWidth="750" prefHeight="650">
     
     <!-- Header -->
     <top>
         <HBox styleClass="top-bar" alignment="CENTER" spacing="20">
             <padding>
-                <Insets top="10" right="20" bottom="10" left="20"/>
+                <Insets top="15" right="20" bottom="15" left="20"/>
             </padding>
-            <Label text="🛒 Shopping Cart" styleClass="page-title"/>
+            <Label text="Shopping Cart" styleClass="page-title"/>
         </HBox>
     </top>
     
     <!-- Main Content -->
     <center>
-        <VBox spacing="15" styleClass="cart-content">
+        <VBox spacing="15" style="-fx-background-color: #f8f9fa;">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="25" bottom="10" left="25"/>
             </padding>
             
-            <!-- Cart Items Table -->
-            <Label text="Cart Items" styleClass="section-title"/>
-            <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="productColumn" text="Product" prefWidth="180"/>
-                    <TableColumn fx:id="quantityColumn" text="Quantity (kg)" prefWidth="100"/>
-                    <TableColumn fx:id="priceColumn" text="Price/kg" prefWidth="100"/>
-                    <TableColumn fx:id="totalColumn" text="Total" prefWidth="100"/>
-                    <TableColumn fx:id="actionColumn" text="Action" prefWidth="100"/>
-                </columns>
-                <placeholder>
-                    <Label text="Your cart is empty. Add some products!"/>
-                </placeholder>
-            </TableView>
-            
-            <!-- Cart Summary -->
-            <VBox spacing="10" styleClass="cart-summary">
-                <HBox spacing="20">
-                    <Label text="Subtotal:" styleClass="summary-label"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="subtotalLabel" text="$0.00" styleClass="summary-value"/>
-                </HBox>
+            <!-- Cart Items Section -->
+            <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
                 
-                <HBox spacing="20" fx:id="discountRow" visible="false">
-                    <Label fx:id="discountLabel" text="Discount:" styleClass="summary-label"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="discountValueLabel" text="-$0.00" styleClass="discount-value"/>
-                </HBox>
+                <Label text="Cart Items" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                 
-                <HBox spacing="20">
-                    <Label text="VAT (18%):" styleClass="summary-label"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="vatLabel" text="$0.00" styleClass="summary-value"/>
-                </HBox>
-                
-                <Separator/>
-                
-                <HBox spacing="20">
-                    <Label text="TOTAL:" styleClass="total-label"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="totalLabel" text="$0.00" styleClass="total-value"/>
-                </HBox>
+                <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                    <columns>
+                        <TableColumn fx:id="imageColumn" text="" prefWidth="55" minWidth="55" maxWidth="55" sortable="false" resizable="false"/>
+                        <TableColumn fx:id="productColumn" text="Product" prefWidth="160" minWidth="120"/>
+                        <TableColumn fx:id="quantityColumn" text="Qty (kg)" prefWidth="80" minWidth="70"/>
+                        <TableColumn fx:id="priceColumn" text="Price/kg" prefWidth="90" minWidth="80"/>
+                        <TableColumn fx:id="totalColumn" text="Total" prefWidth="90" minWidth="80"/>
+                        <TableColumn fx:id="actionColumn" text="" prefWidth="50" minWidth="50" maxWidth="50" sortable="false" resizable="false"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="Your cart is empty. Add some products!" style="-fx-text-fill: #95a5a6; -fx-font-size: 14px;"/>
+                    </placeholder>
+                </TableView>
             </VBox>
             
-            <!-- Coupon Section -->
-            <HBox spacing="10" alignment="CENTER_LEFT" fx:id="couponSection">
-                <Label text="Have a coupon?" styleClass="field-label"/>
-                <ComboBox fx:id="couponCombo" promptText="Select coupon..." prefWidth="200"/>
-                <Button text="Apply" onAction="#handleApplyCoupon" styleClass="secondary-button"/>
+            <!-- Order Summary Card -->
+            <HBox spacing="20">
+                <!-- Left side: Coupon + Delivery -->
+                <VBox spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <!-- Coupon Section -->
+                    <VBox spacing="8" fx:id="couponSection">
+                        <Label text="Apply Coupon" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <ComboBox fx:id="couponCombo" promptText="Select coupon..." prefWidth="180"/>
+                            <Button text="Apply" onAction="#handleApplyCoupon" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 11px;"/>
+                        </HBox>
+                    </VBox>
+                    
+                    <Separator/>
+                    
+                    <!-- Delivery Section -->
+                    <VBox spacing="8">
+                        <Label text="Delivery (within 48 hours)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <DatePicker fx:id="deliveryDatePicker" promptText="Date" prefWidth="130"/>
+                            <ComboBox fx:id="deliveryTimeCombo" promptText="Time" prefWidth="100"/>
+                        </HBox>
+                    </VBox>
+                    
+                    <!-- Minimum order warning -->
+                    <Label fx:id="minimumWarning" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                </VBox>
+                
+                <!-- Right side: Order Summary -->
+                <VBox spacing="8" prefWidth="220" style="-fx-background-color: white; -fx-background-radius: 8;">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    
+                    <Label text="Order Summary" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    
+                    <HBox>
+                        <Label text="Subtotal" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="subtotalLabel" text="0.00" style="-fx-font-size: 12px;"/>
+                    </HBox>
+                    
+                    <HBox fx:id="discountRow" visible="false" managed="false">
+                        <Label fx:id="discountLabel" text="Discount" style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="discountValueLabel" text="0.00" style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"/>
+                    </HBox>
+                    
+                    <HBox>
+                        <Label text="VAT (18%)" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="vatLabel" text="0.00" style="-fx-font-size: 12px;"/>
+                    </HBox>
+                    
+                    <Separator/>
+                    
+                    <HBox>
+                        <Label text="TOTAL" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="totalLabel" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #27ae60;"/>
+                    </HBox>
+                </VBox>
             </HBox>
-            
-            <!-- Delivery Date Selection -->
-            <VBox spacing="10">
-                <Label text="Select Delivery Date and Time (within 48 hours):" styleClass="section-title"/>
-                <HBox spacing="15" alignment="CENTER_LEFT">
-                    <DatePicker fx:id="deliveryDatePicker" promptText="Select date"/>
-                    <ComboBox fx:id="deliveryTimeCombo" promptText="Select time" prefWidth="150"/>
-                </HBox>
-            </VBox>
-            
-            <!-- Minimum order warning -->
-            <Label fx:id="minimumWarning" text="" styleClass="warning-label" visible="false"/>
         </VBox>
     </center>
     
     <!-- Bottom Buttons -->
     <bottom>
-        <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="button-bar">
+        <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-background-color: #f8f9fa; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
             <padding>
-                <Insets top="15" right="20" bottom="15" left="20"/>
+                <Insets top="15" right="25" bottom="15" left="25"/>
             </padding>
             
-            <Button text="Clear Cart" onAction="#handleClearCart" styleClass="danger-button"/>
+            <Button text="Clear Cart" onAction="#handleClearCart" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 16 8 16;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Continue Shopping" onAction="#handleContinueShopping" styleClass="secondary-button"/>
+            <Button text="Continue Shopping" onAction="#handleContinueShopping" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 16 8 16;"/>
             <Button fx:id="checkoutButton" text="Complete Purchase" onAction="#handleCheckout" 
-                    styleClass="primary-button"/>
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 8 20 8 20;"/>
         </HBox>
     </bottom>
     

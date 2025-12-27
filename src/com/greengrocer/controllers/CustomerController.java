@@ -203,13 +203,13 @@ public class CustomerController {
     /**
      * Loads an image from the images folder or uses placeholder.
      * 
-     * @param imageView The ImageView to set the image on
+     * @param imageView   The ImageView to set the image on
      * @param productName The name of the product (used to find the image file)
      */
     private void loadImageFromFile(ImageView imageView, String productName) {
         String baseName = productName.toLowerCase().replace(" ", "_");
-        String[] extensions = {".png", ".jpg", ".jpeg"};
-        
+        String[] extensions = { ".png", ".jpg", ".jpeg" };
+
         for (String ext : extensions) {
             try {
                 // Try to load product-specific image
@@ -399,8 +399,9 @@ public class CustomerController {
             updateLoyaltyStatus();
 
         } catch (Exception e) {
+            System.err.println("ERROR opening cart: " + e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
-            AlertUtils.showError("Error", "Could not open shopping cart.");
+            AlertUtils.showError("Error", "Could not open shopping cart: " + e.getMessage());
         }
     }
 

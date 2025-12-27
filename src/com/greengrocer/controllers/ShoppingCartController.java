@@ -10,7 +10,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +31,8 @@ public class ShoppingCartController {
 
     @FXML
     private TableView<CartItem> cartTable;
+    @FXML
+    private TableColumn<CartItem, Void> imageColumn;
     @FXML
     private TableColumn<CartItem, String> productColumn;
     @FXML
@@ -62,7 +67,7 @@ public class ShoppingCartController {
     @FXML
     private Button checkoutButton;
     @FXML
-    private HBox couponSection;
+    private VBox couponSection;
 
     private CartManager cartManager;
     private ProductDAO productDAO;
@@ -93,6 +98,12 @@ public class ShoppingCartController {
         currentUser = SessionManager.getInstance().getCurrentUser();
         loyaltySettings = loyaltySettingsDAO.getSettings();
 
+        // Set fixed row height for better image display
+        cartTable.setFixedCellSize(50);
+
+        // Make columns fill the table width (no empty space on right)
+        cartTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+
         setupTableColumns();
         setupDeliveryOptions();
         loadCoupons();
@@ -106,6 +117,29 @@ public class ShoppingCartController {
      * Sets up the table columns.
      */
     private void setupTableColumns() {
+        // Image column
+        imageColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
+            private final ImageView imageView = new ImageView();
+
+            {
+                imageView.setFitWidth(40);
+                imageView.setFitHeight(40);
+                imageView.setPreserveRatio(true);
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    CartItem cartItem = getTableView().getItems().get(getIndex());
+                    loadProductImage(imageView, cartItem.getProductName());
+                    setGraphic(imageView);
+                }
+            }
+        });
+
         productColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getProductName()));
 
         quantityColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getQuantity()).asObject());
@@ -136,12 +170,13 @@ public class ShoppingCartController {
             }
         });
 
-        // Action column with remove button
+        // Action column with compact remove button
         actionColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
-            private final Button removeBtn = new Button("Remove");
+            private final Button removeBtn = new Button("✕");
 
             {
-                removeBtn.getStyleClass().add("danger-button");
+                removeBtn.setStyle(
+                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 2 6 2 6;");
                 removeBtn.setOnAction(e -> {
                     CartItem item = getTableView().getItems().get(getIndex());
                     cartManager.removeItem(item.getProductId());
@@ -155,6 +190,28 @@ public class ShoppingCartController {
                 setGraphic(empty ? null : removeBtn);
             }
         });
+    }
+
+    /**
+     * Loads product image from resources.
+     */
+    private void loadProductImage(ImageView imageView, String productName) {
+        String baseName = productName.toLowerCase().replace(" ", "_");
+        String[] extensions = { ".png", ".jpg", ".jpeg" };
+
+        for (String ext : extensions) {
+            try {
+                Image image = new Image(getClass().getResourceAsStream("/com/greengrocer/images/" + baseName + ext));
+                if (image != null && !image.isError()) {
+                    imageView.setImage(image);
+                    return;
+                }
+            } catch (Exception e) {
+                // Try next extension
+            }
+        }
+        // Set placeholder style if no image found
+        imageView.setImage(null);
     }
 
     /**
@@ -194,6 +251,7 @@ public class ShoppingCartController {
 
         if (coupons.isEmpty()) {
             couponSection.setVisible(false);
+            couponSection.setManaged(false);
         }
     }
 
@@ -201,10 +259,14 @@ public class ShoppingCartController {
      * Checks if user is eligible for loyalty discount.
      */
     private void checkLoyaltyDiscount() {
+        if (loyaltySettings == null || currentUser == null) {
+            return;
+        }
         if (loyaltySettings.isEligible(currentUser.getCompletedOrders())) {
             appliedDiscountPercent = loyaltySettings.getDiscountPercent();
             discountLabel.setText(String.format("Loyalty Discount (%.0f%%):", appliedDiscountPercent));
             discountRow.setVisible(true);
+            discountRow.setManaged(true);
             updateTotals();
         }
     }
@@ -234,6 +296,7 @@ public class ShoppingCartController {
         if (appliedDiscountPercent > 0) {
             discountValueLabel.setText(String.format("-$%.2f", discount));
             discountRow.setVisible(true);
+            discountRow.setManaged(true);
         }
 
         vatLabel.setText(String.format("$%.2f", vat));
@@ -246,12 +309,14 @@ public class ShoppingCartController {
     private void checkMinimum() {
         if (!cartManager.meetsMinimum()) {
             double needed = CartManager.MINIMUM_CART_VALUE - cartManager.getSubtotal();
-            minimumWarning.setText(String.format("Minimum order is $%.2f. Add $%.2f more to checkout.",
+            minimumWarning.setText(String.format("Minimum order: $%.2f. Add $%.2f more.",
                     CartManager.MINIMUM_CART_VALUE, needed));
             minimumWarning.setVisible(true);
+            minimumWarning.setManaged(true);
             checkoutButton.setDisable(true);
         } else {
             minimumWarning.setVisible(false);
+            minimumWarning.setManaged(false);
             checkoutButton.setDisable(cartManager.isEmpty());
         }
     }
