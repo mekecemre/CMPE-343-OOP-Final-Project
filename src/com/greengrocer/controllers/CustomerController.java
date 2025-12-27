@@ -144,15 +144,16 @@ public class CustomerController {
         imageView.setFitHeight(80);
         imageView.setPreserveRatio(true);
 
-        // Load image from database or use placeholder
+        // Load image from database, file, or use placeholder
         if (product.getImage() != null) {
             try {
                 Image image = new Image(new ByteArrayInputStream(product.getImage()));
                 imageView.setImage(image);
             } catch (Exception e) {
-                // Use placeholder
-                imageView.setStyle("-fx-background-color: #e0e0e0;");
+                loadImageFromFile(imageView, product.getName());
             }
+        } else {
+            loadImageFromFile(imageView, product.getName());
         }
 
         // Product name
@@ -197,6 +198,50 @@ public class CustomerController {
         card.getChildren().addAll(imageView, nameLabel, priceLabel, stockLabel, addBox);
 
         return card;
+    }
+
+    /**
+     * Loads an image from the images folder or uses placeholder.
+     * 
+     * @param imageView The ImageView to set the image on
+     * @param productName The name of the product (used to find the image file)
+     */
+    private void loadImageFromFile(ImageView imageView, String productName) {
+        String baseName = productName.toLowerCase().replace(" ", "_");
+        String[] extensions = {".png", ".jpg", ".jpeg"};
+        
+        for (String ext : extensions) {
+            try {
+                // Try to load product-specific image
+                Image image = new Image(getClass().getResourceAsStream("/com/greengrocer/images/" + baseName + ext));
+                if (image != null && !image.isError()) {
+                    imageView.setImage(image);
+                    return;
+                }
+            } catch (Exception e) {
+                // Try next extension
+            }
+        }
+        // No image found, use placeholder
+        loadPlaceholder(imageView);
+    }
+
+    /**
+     * Loads the placeholder image.
+     * 
+     * @param imageView The ImageView to set the placeholder on
+     */
+    private void loadPlaceholder(ImageView imageView) {
+        try {
+            Image placeholder = new Image(getClass().getResourceAsStream("/com/greengrocer/images/placeholder.png"));
+            if (placeholder != null && !placeholder.isError()) {
+                imageView.setImage(placeholder);
+            } else {
+                imageView.setStyle("-fx-background-color: #e0e0e0;");
+            }
+        } catch (Exception e) {
+            imageView.setStyle("-fx-background-color: #e0e0e0;");
+        }
     }
 
     /**

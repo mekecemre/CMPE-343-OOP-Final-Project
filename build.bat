@@ -123,6 +123,7 @@ if errorlevel 1 (
 echo [3/3] Copying resources...
 xcopy /s /i /q "%SRC_DIR%\com\greengrocer\views" "%OUT_DIR%\com\greengrocer\views"
 xcopy /s /i /q "%SRC_DIR%\com\greengrocer\styles" "%OUT_DIR%\com\greengrocer\styles"
+xcopy /s /i /q "%SRC_DIR%\com\greengrocer\images" "%OUT_DIR%\com\greengrocer\images"
 
 echo.
 echo ========================================
