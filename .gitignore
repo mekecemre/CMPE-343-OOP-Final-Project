@@ -113,7 +113,8 @@ gradle-app.setting
 # Application-specific
 # Ignore all library files (platform-specific dependencies)
 # Each developer must download their own platform-specific versions
-lib/
+lib/*
+!lib/.gitkeep
 
 # Keep SQL scripts
 # sql/

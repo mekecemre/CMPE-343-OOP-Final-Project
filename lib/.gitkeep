@@ -1,0 +1,9 @@
+# This file ensures the lib/ directory is tracked in git
+# while the actual library files remain untracked.
+#
+# Required libraries (download these yourself):
+# - JavaFX SDK 25.0.1 (platform-specific)
+# - mysql-connector-j-8.0.33.jar
+# - itextpdf-5.5.13.3.jar
+#
+# See README.md for download instructions.
