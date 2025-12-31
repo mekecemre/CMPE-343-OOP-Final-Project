@@ -111,13 +111,9 @@ gradle-app.setting
 !gradle-wrapper.properties
 
 # Application-specific
-# Keep lib/ folder for external JARs (like MySQL connector)
-# but ignore if you download dependencies differently
-# lib/
-
-# JavaFX SDK (platform-specific, each developer downloads their own)
-lib/javafx-sdk*/
-lib/*javafx*/
+# Ignore all library files (platform-specific dependencies)
+# Each developer must download their own platform-specific versions
+lib/
 
 # Keep SQL scripts
 # sql/

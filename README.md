@@ -17,11 +17,24 @@ Project3/
 │       ├── utils/              # Utility classes
 │       ├── views/              # FXML files
 │       └── styles/             # CSS stylesheets
-├── lib/                        # Required JAR libraries
-│   ├── javafx-sdk-25.0.1/     # JavaFX SDK (download for your OS, not tracked in git)
-│   ├── mysql-connector-j-8.0.33.jar
+├── lib/                        # Required JAR libraries (NOT tracked in git)
+│   ├── javafx-sdk-25.0.1/     # JavaFX SDK - download for your OS
+│   ├── mysql-connector-j-8.0.33.jar  # MySQL JDBC driver
 │   └── itextpdf-5.5.13.3.jar  # PDF generation library
 └── README.md
+```
+
+## ⚠️ Important: Library Dependencies
+
+**The `lib/` directory is NOT tracked in git** because it contains platform-specific dependencies. Each developer must download the required libraries for their own operating system.
+
+### Required Libraries
+
+1. **JavaFX SDK** (Platform-specific - Windows/Linux/macOS)
+2. **MySQL Connector/J** (Platform-independent)
+3. **iTextPDF** (Platform-independent)
+
+See the detailed setup instructions below.
 ```
 
 ## Prerequisites
@@ -30,7 +43,19 @@ Project3/
    - Check your version: `java -version`
    - Download JDK: https://adoptium.net/temurin/releases/
 
-2. **JavaFX SDK** - Must match your Java version:
+   > **⚠️ IMPORTANT**: 
+   > - JavaFX SDK is **platform-specific** - download the correct version for your OS
+   > - If you get "class file has wrong version" errors, your Java and JavaFX versions don't match
+   > - Windows SDK contains `.dll` files, Linux has `.so` files, macOS has `.dylib` files
+
+3. **MySQL Server 8.0+** (or MariaDB)
+
+4. **MySQL Connector/J 8.0.33** (Platform-independent JAR)
+   - Download: https://dev.mysql.com/downloads/connector/j/
+   - Or direct: https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+
+5. **iTextPDF 5.5.13.3** (Platform-independent JAR for PDF invoice generation)
+   - Download: https://repo1.maven.org/maven2/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar
 
    | Your Java Version | Required JavaFX SDK | Download Link |
    |-------------------|---------------------|---------------|
@@ -46,11 +71,61 @@ Project3/
 
 ## Setup Instructions
 
-### 1. JavaFX SDK Setup
+### 1. Create lib Directory and Download Libraries
 
-Download the JavaFX SDK for your operating system (see Prerequisites) and extract it to the `lib/` directory:
+Since the `lib/` directory is not tracked in git (platform-specific dependencies), you need to create it and download all required libraries:
 
-**Example structure after extraction:**
+#### Step 1: Create the lib directory
+```bash
+mkdir -p lib
+cd lib
+```
+
+#### Step 2: Download JavaFX SDK (Platform-specific)
+
+**Choose your operating system:**
+
+**Linux (x64):**
+```bash
+wget https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_linux-x64_bin-sdk.zip
+unzip openjfx-25.0.1_linux-x64_bin-sdk.zip
+rm openjfx-25.0.1_linux-x64_bin-sdk.zip
+```
+
+**macOS (ARM - Apple Silicon):**
+```bash
+wget https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_osx-aarch64_bin-sdk.zip
+unzip openjfx-25.0.1_osx-aarch64_bin-sdk.zip
+rm openjfx-25.0.1_osx-aarch64_bin-sdk.zip
+```
+
+**macOS (Intel):**
+```bash
+wget https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_osx-x64_bin-sdk.zip
+unzip openjfx-25.0.1_osx-x64_bin-sdk.zip
+rm openjfx-25.0.1_osx-x64_bin-sdk.zip
+```
+
+**Windows:**
+1. Download: https://download2.gluonhq.com/openjfx/25.0.1/openjfx-25.0.1_windows-x64_bin-sdk.zip
+2. Extract to `lib/` directory
+3. Ensure the folder is named `javafx-sdk-25.0.1`
+
+#### Step 3: Download MySQL Connector/J
+```bash
+wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+```
+
+Or download manually from: https://dev.mysql.com/downloads/connector/j/
+
+#### Step 4: Download iTextPDF
+```bash
+wget https://repo1.maven.org/maven2/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar
+```
+
+#### Step 5: Verify Directory Structure
+
+Your `lib/` directory should now look like this:
 ```
 lib/
 ├── javafx-sdk-25.0.1/
@@ -58,14 +133,34 @@ lib/
 │       ├── javafx.base.jar
 │       ├── javafx.controls.jar
 │       ├── javafx.fxml.jar
-│       └── ... (platform-specific native libraries)
+│       ├── javafx.graphics.jar
+│       └── libglassgtk3.so (Linux) / glass.dll (Windows) / libglass.dylib (macOS)
 ├── mysql-connector-j-8.0.33.jar
 └── itextpdf-5.5.13.3.jar
 ```
 
-**Note:** The JavaFX SDK is platform-specific (contains `.dll` for Windows, `.so` for Linux, `.dylib` for macOS). Each developer must download the SDK for their own operating system. The SDK is not tracked in git.
+> **⚠️ CRITICAL**: 
+> - The JavaFX SDK **must** match your operating system
+> - Linux SDK contains `.so` files, Windows has `.dll`, macOS has `.dylib`
+> - Using the wrong platform's SDK will cause `ClassNotFoundException: GtkPlatformFactory` or similar errors
+> - The `lib/` directory is in `.gitignore` - **do not commit these files to git**
 
-### 2. Database Setup
+### 2. VS Code Configuration (Optional)
+
+The `.vscode/` directory is also excluded from git as it contains user-specific IDE settings. If you're using VS Code, you may want to create your own configuration:
+
+**Example `.vscode/settings.json`:**
+```json
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.outputPath": "out",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ]
+}
+```
+
+### 3. Database Setup
 
 1. Start MySQL Server
 2. Login to MySQL:
@@ -257,26 +352,37 @@ javadoc -d docs --module-path $env:PATH_TO_FX --add-modules javafx.controls,java
 
 ## Troubleshooting
 
-1. **Graphics Device initialization failed / No suitable pipeline found**:
+1. **ClassNotFoundException: com.sun.glass.ui.gtk.GtkPlatformFactory** (Linux):
+   - You're using the Windows version of JavaFX SDK instead of the Linux version
+   - Delete `lib/javafx-sdk-25.0.1/` and download the correct Linux SDK
+   - Verify the SDK contains `.so` files, not `.dll` files
+
+2. **Graphics Device initialization failed / No suitable pipeline found**:
    - You're using the wrong JavaFX SDK for your operating system
    - Download the correct platform-specific SDK (Windows/Linux/macOS)
    - Ensure the SDK is extracted to `lib/javafx-sdk-25.0.1/`
-   - Linux: May need to install `libgtk-3-0` and OpenGL libraries
+   - Linux: May need to install GTK3 libraries: `sudo apt install libgtk-3-0 libgl1`
+   - Wayland users: Set environment variable `_JAVA_AWT_WM_NONREPARENTING=1`
 
-2. **Database Connection Error**: 
+3. **FileNotFoundException or lib/ directory missing**:
+   - The `lib/` directory is not tracked in git - you must create it and download all libraries
+   - Follow the "Setup Instructions" section above
+   - Ensure all three libraries are present: JavaFX SDK, MySQL Connector, iTextPDF
+
+4. **Database Connection Error**:
    - Ensure MySQL/MariaDB is running: `systemctl status mysql` or `systemctl status mariadb`
    - Verify user credentials are correct (myuser/1234)
    - Check if user has permissions: `GRANT ALL PRIVILEGES ON greengrocer.* TO 'myuser'@'localhost';`
 
-3. **ClassNotFoundException**: 
+5. **ClassNotFoundException (MySQL/iText related)**:
    - Verify MySQL Connector JAR is in `lib/` directory
    - Check build script is including it in classpath
 
-4. **FXML Load Error**: 
+6. **FXML Load Error**:
    - Ensure resources are copied to output directory
    - Check that `src/com/greengrocer/views/` and `styles/` exist
 
-5. **JavaFX Module Error**: 
+7. **JavaFX Module Error**:
    - Verify JavaFX SDK path is correct in build/run scripts
    - Ensure you're using Java 11 or later
 
