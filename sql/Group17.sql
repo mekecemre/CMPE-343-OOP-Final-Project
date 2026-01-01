@@ -206,5 +206,5 @@ INSERT INTO LoyaltySettings (min_orders_for_discount, discount_percent) VALUES (
 
 -- Insert a sample coupon
 INSERT INTO Coupons (code, discount_percent, min_order_value, expiry_date, is_active) VALUES
-('WELCOME10', 10.0, 20.0, '2025-12-31', TRUE),
-('SAVE20', 20.0, 50.0, '2025-12-31', TRUE);
+('WELCOME10', 10.0, 20.0, '2027-12-31', TRUE),
+('SAVE20', 20.0, 50.0, '2027-12-31', TRUE);

@@ -163,6 +163,13 @@ public class OwnerController {
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
+     * Default constructor for OwnerController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public OwnerController() {
+    }
+
+    /**
      * Initializes the controller.
      */
     @FXML
@@ -213,7 +220,7 @@ public class OwnerController {
             String status = p.getStock() <= 0 ? "Out of Stock" : (p.isLowStock() ? "Low Stock (2x Price)" : "Normal");
             return new SimpleStringProperty(status);
         });
-        
+
         // Image column with thumbnail
         prodImageColumn.setCellFactory(col -> new TableCell<Product, Void>() {
             private final ImageView imageView = new ImageView();
@@ -222,7 +229,7 @@ public class OwnerController {
                 imageView.setFitHeight(40);
                 imageView.setPreserveRatio(true);
             }
-            
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -240,11 +247,11 @@ public class OwnerController {
                 }
             }
         });
-        
+
         // Set row height for images
         productsTable.setFixedCellSize(45);
     }
-    
+
     /**
      * Loads product image from database or resources.
      */
@@ -253,11 +260,11 @@ public class OwnerController {
         if (product.getImage() != null && product.getImage().length > 0) {
             return new Image(new ByteArrayInputStream(product.getImage()));
         }
-        
+
         // Fall back to resource image
         String baseName = product.getName().toLowerCase().replace(" ", "_");
         String[] extensions = { ".png", ".jpg", ".jpeg" };
-        
+
         for (String ext : extensions) {
             try {
                 Image image = new Image(getClass().getResourceAsStream("/com/greengrocer/images/" + baseName + ext));
@@ -284,8 +291,8 @@ public class OwnerController {
         result.ifPresent(product -> {
             // Check for duplicate name
             if (productDAO.existsByName(product.getName())) {
-                AlertUtils.showError("Duplicate Name", 
-                    "A product with the name '" + product.getName() + "' already exists.");
+                AlertUtils.showError("Duplicate Name",
+                        "A product with the name '" + product.getName() + "' already exists.");
                 return;
             }
             if (productDAO.add(product)) {
@@ -310,13 +317,13 @@ public class OwnerController {
         result.ifPresent(product -> {
             // Check for duplicate name (excluding current product)
             if (productDAO.existsByNameExcluding(product.getName(), product.getId())) {
-                AlertUtils.showError("Duplicate Name", 
-                    "Another product with the name '" + product.getName() + "' already exists.");
+                AlertUtils.showError("Duplicate Name",
+                        "Another product with the name '" + product.getName() + "' already exists.");
                 return;
             }
             // Use updateWithImage if image is set
-            boolean success = product.getImage() != null ? 
-                productDAO.updateWithImage(product) : productDAO.update(product);
+            boolean success = product.getImage() != null ? productDAO.updateWithImage(product)
+                    : productDAO.update(product);
             if (success) {
                 AlertUtils.showSuccess("Product updated successfully!");
                 loadProducts();
@@ -366,16 +373,16 @@ public class OwnerController {
         TextField priceField = new TextField(existing != null ? String.valueOf(existing.getPrice()) : "");
         TextField stockField = new TextField(existing != null ? String.valueOf(existing.getStock()) : "");
         TextField thresholdField = new TextField(existing != null ? String.valueOf(existing.getThreshold()) : "5.0");
-        
+
         // Image upload section
         ImageView previewImage = new ImageView();
         previewImage.setFitWidth(60);
         previewImage.setFitHeight(60);
         previewImage.setPreserveRatio(true);
-        
+
         // Array to hold selected image bytes
-        final byte[][] selectedImageBytes = {existing != null ? existing.getImage() : null};
-        
+        final byte[][] selectedImageBytes = { existing != null ? existing.getImage() : null };
+
         // Load existing image preview
         if (existing != null) {
             Image img = loadProductImage(existing);
@@ -383,16 +390,15 @@ public class OwnerController {
                 previewImage.setImage(img);
             }
         }
-        
+
         Button uploadBtn = new Button("Choose Image...");
         Label imageLabel = new Label(selectedImageBytes[0] != null ? "Image set" : "No image");
-        
+
         uploadBtn.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Product Image");
             fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
-            );
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"));
             File file = fileChooser.showOpenDialog(dialog.getOwner());
             if (file != null) {
                 try {
@@ -405,7 +411,7 @@ public class OwnerController {
                 }
             }
         });
-        
+
         HBox imageBox = new HBox(10, previewImage, uploadBtn, imageLabel);
         imageBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 

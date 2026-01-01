@@ -39,28 +39,58 @@ public class LoyaltySettings {
 
     // ==================== GETTERS ====================
 
+    /**
+     * Gets the unique identifier for this loyalty settings record.
+     * 
+     * @return the settings ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the minimum number of orders required for loyalty discount.
+     * 
+     * @return the minimum orders required
+     */
     public int getMinOrdersForDiscount() {
         return minOrdersForDiscount;
     }
 
+    /**
+     * Gets the discount percentage for loyal customers.
+     * 
+     * @return the discount percentage
+     */
     public double getDiscountPercent() {
         return discountPercent;
     }
 
     // ==================== SETTERS ====================
 
+    /**
+     * Sets the unique identifier for this loyalty settings record.
+     * 
+     * @param id the settings ID to set
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * Sets the minimum number of orders required for loyalty discount.
+     * 
+     * @param minOrdersForDiscount the minimum orders to set
+     */
     public void setMinOrdersForDiscount(int minOrdersForDiscount) {
         this.minOrdersForDiscount = minOrdersForDiscount;
     }
 
+    /**
+     * Sets the discount percentage for loyal customers.
+     * 
+     * @param discountPercent the discount percentage to set
+     */
     public void setDiscountPercent(double discountPercent) {
         this.discountPercent = discountPercent;
     }

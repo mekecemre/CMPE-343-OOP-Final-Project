@@ -41,6 +41,13 @@ public class LoginController {
     private UserDAO userDAO;
 
     /**
+     * Default constructor for LoginController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public LoginController() {
+    }
+
+    /**
      * Initializes the controller.
      * Called automatically after FXML is loaded.
      */

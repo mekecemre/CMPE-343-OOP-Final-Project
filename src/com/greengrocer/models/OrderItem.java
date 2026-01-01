@@ -69,26 +69,56 @@ public class OrderItem {
 
     // ==================== GETTERS ====================
 
+    /**
+     * Gets the unique identifier for this order item.
+     * 
+     * @return the order item ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the ID of the order this item belongs to.
+     * 
+     * @return the order ID
+     */
     public int getOrderId() {
         return orderId;
     }
 
+    /**
+     * Gets the ID of the product.
+     * 
+     * @return the product ID
+     */
     public int getProductId() {
         return productId;
     }
 
+    /**
+     * Gets the name of the product.
+     * 
+     * @return the product name
+     */
     public String getProductName() {
         return productName;
     }
 
+    /**
+     * Gets the quantity of the product in kilograms.
+     * 
+     * @return the quantity in kg
+     */
     public double getQuantity() {
         return quantity;
     }
 
+    /**
+     * Gets the price per kilogram at the time of purchase.
+     * 
+     * @return the price per kg at purchase time
+     */
     public double getPriceAtTime() {
         return priceAtTime;
     }
@@ -104,26 +134,56 @@ public class OrderItem {
 
     // ==================== SETTERS ====================
 
+    /**
+     * Sets the unique identifier for this order item.
+     * 
+     * @param id the order item ID to set
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * Sets the ID of the order this item belongs to.
+     * 
+     * @param orderId the order ID to set
+     */
     public void setOrderId(int orderId) {
         this.orderId = orderId;
     }
 
+    /**
+     * Sets the ID of the product.
+     * 
+     * @param productId the product ID to set
+     */
     public void setProductId(int productId) {
         this.productId = productId;
     }
 
+    /**
+     * Sets the name of the product.
+     * 
+     * @param productName the product name to set
+     */
     public void setProductName(String productName) {
         this.productName = productName;
     }
 
+    /**
+     * Sets the quantity of the product in kilograms.
+     * 
+     * @param quantity the quantity in kg to set
+     */
     public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 
+    /**
+     * Sets the price per kilogram at the time of purchase.
+     * 
+     * @param priceAtTime the price per kg to set
+     */
     public void setPriceAtTime(double priceAtTime) {
         this.priceAtTime = priceAtTime;
     }

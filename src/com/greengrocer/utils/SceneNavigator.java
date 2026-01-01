@@ -21,6 +21,13 @@ public class SceneNavigator {
     public static final int WINDOW_HEIGHT = 540;
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private SceneNavigator() {
+    }
+
+    /**
      * Loads a new scene in the given stage.
      * Preserves fullscreen and maximized window states.
      * 
@@ -35,14 +42,14 @@ public class SceneNavigator {
             boolean wasFullScreen = stage.isFullScreen();
             double currentWidth = stage.getWidth();
             double currentHeight = stage.getHeight();
-            
+
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/com/greengrocer/views/" + fxmlPath));
             Parent root = loader.load();
 
             // Use current window size if already shown, otherwise use defaults
             double width = currentWidth > 0 ? currentWidth : WINDOW_WIDTH;
             double height = currentHeight > 0 ? currentHeight : WINDOW_HEIGHT;
-            
+
             Scene scene = new Scene(root, width, height);
             scene.getStylesheets()
                     .add(SceneNavigator.class.getResource("/com/greengrocer/styles/application.css").toExternalForm());
@@ -51,7 +58,7 @@ public class SceneNavigator {
             stage.setScene(scene);
             stage.setMinWidth(800);
             stage.setMinHeight(450);
-            
+
             // Restore window state
             if (wasFullScreen) {
                 stage.setFullScreen(true);

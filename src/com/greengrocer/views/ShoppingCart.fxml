@@ -71,6 +71,9 @@
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <ComboBox fx:id="couponCombo" promptText="Select coupon..." prefWidth="180"/>
                             <Button text="Apply" onAction="#handleApplyCoupon" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 11px;"/>
+                            <Button fx:id="removeCouponBtn" text="Remove" onAction="#handleRemoveCoupon" 
+                                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 11px;" 
+                                    visible="false" managed="false"/>
                         </HBox>
                     </VBox>
                     

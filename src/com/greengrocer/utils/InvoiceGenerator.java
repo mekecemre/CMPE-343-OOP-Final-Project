@@ -21,6 +21,13 @@ public class InvoiceGenerator {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private InvoiceGenerator() {
+    }
+
+    /**
      * Generates an invoice for an order.
      * 
      * @param order           The order

@@ -54,52 +54,112 @@ public class Coupon {
 
     // ==================== GETTERS ====================
 
+    /**
+     * Gets the unique identifier for this coupon.
+     * 
+     * @return the coupon ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the coupon code.
+     * 
+     * @return the coupon code
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Gets the discount percentage.
+     * 
+     * @return the discount percentage (e.g., 10 for 10%)
+     */
     public double getDiscountPercent() {
         return discountPercent;
     }
 
+    /**
+     * Gets the minimum order value required to use this coupon.
+     * 
+     * @return the minimum order value
+     */
     public double getMinOrderValue() {
         return minOrderValue;
     }
 
+    /**
+     * Gets the expiry date of the coupon.
+     * 
+     * @return the expiry date, or null if no expiry
+     */
     public LocalDate getExpiryDate() {
         return expiryDate;
     }
 
+    /**
+     * Checks if the coupon is currently active.
+     * 
+     * @return true if the coupon is active
+     */
     public boolean isActive() {
         return isActive;
     }
 
     // ==================== SETTERS ====================
 
+    /**
+     * Sets the unique identifier for this coupon.
+     * 
+     * @param id the coupon ID to set
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * Sets the coupon code.
+     * 
+     * @param code the coupon code to set
+     */
     public void setCode(String code) {
         this.code = code;
     }
 
+    /**
+     * Sets the discount percentage.
+     * 
+     * @param discountPercent the discount percentage to set
+     */
     public void setDiscountPercent(double discountPercent) {
         this.discountPercent = discountPercent;
     }
 
+    /**
+     * Sets the minimum order value required to use this coupon.
+     * 
+     * @param minOrderValue the minimum order value to set
+     */
     public void setMinOrderValue(double minOrderValue) {
         this.minOrderValue = minOrderValue;
     }
 
+    /**
+     * Sets the expiry date of the coupon.
+     * 
+     * @param expiryDate the expiry date to set
+     */
     public void setExpiryDate(LocalDate expiryDate) {
         this.expiryDate = expiryDate;
     }
 
+    /**
+     * Sets whether the coupon is active.
+     * 
+     * @param active true to activate the coupon, false to deactivate
+     */
     public void setActive(boolean active) {
         isActive = active;
     }

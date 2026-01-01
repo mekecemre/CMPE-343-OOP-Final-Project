@@ -69,6 +69,8 @@ public class ShoppingCartController {
     @FXML
     private VBox couponSection;
     @FXML
+    private Button removeCouponBtn;
+    @FXML
     private VBox loyaltySection;
     @FXML
     private ComboBox<String> loyaltyCombo;
@@ -90,7 +92,19 @@ public class ShoppingCartController {
     private double loyaltyDiscountPercent = 0;
     private Coupon appliedCoupon = null;
     private LoyaltySettings loyaltySettings;
+    /**
+     * Tracks if user is eligible for loyalty discount - kept for potential future
+     * use
+     */
+    @SuppressWarnings("unused")
     private boolean loyaltyEligible = false;
+
+    /**
+     * Default constructor for ShoppingCartController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public ShoppingCartController() {
+    }
 
     /**
      * Initializes the controller.
@@ -254,12 +268,20 @@ public class ShoppingCartController {
      */
     private void loadCoupons() {
         List<Coupon> coupons = couponDAO.findUserCoupons(currentUser.getId());
+        System.out.println("DEBUG: Loading coupons for user ID: " + currentUser.getId()
+                + ", found " + coupons.size() + " coupons");
+        for (Coupon c : coupons) {
+            System.out.println("DEBUG: Coupon found: " + c.getCode() + " - " + c.getDiscountPercent() + "%");
+        }
         couponCombo.getItems().clear();
         couponCombo.getItems().addAll(coupons);
 
         if (coupons.isEmpty()) {
             couponSection.setVisible(false);
             couponSection.setManaged(false);
+        } else {
+            couponSection.setVisible(true);
+            couponSection.setManaged(true);
         }
     }
 
@@ -270,32 +292,36 @@ public class ShoppingCartController {
         if (loyaltySettings == null || currentUser == null) {
             return;
         }
-        
+
         // Always show loyalty section
         loyaltySection.setVisible(true);
         loyaltySection.setManaged(true);
         loyaltyCombo.getItems().clear();
-        
+
         int completedOrders = currentUser.getCompletedOrders();
         int requiredOrders = loyaltySettings.getMinOrdersForDiscount();
-        
+
         if (loyaltySettings.isEligible(completedOrders)) {
             loyaltyEligible = true;
             // User is eligible - show discount options
             loyaltyCombo.getItems().add("No discount");
-            loyaltyCombo.getItems().add(String.format("Loyalty Discount: %.0f%% off", loyaltySettings.getDiscountPercent()));
+            loyaltyCombo.getItems()
+                    .add(String.format("Loyalty Discount: %.0f%% off", loyaltySettings.getDiscountPercent()));
             loyaltyCombo.setValue("No discount");
-            loyaltyCalcLabel.setText(String.format("🎉 You have %d completed orders - discount unlocked!", completedOrders));
+            loyaltyCalcLabel
+                    .setText(String.format("🎉 You have %d completed orders - discount unlocked!", completedOrders));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         } else {
             // User not eligible yet - show progress
             loyaltyEligible = false;
             int remaining = requiredOrders - completedOrders;
-            loyaltyCombo.getItems().add(String.format("Complete %d more order(s) to unlock %.0f%% off", remaining, loyaltySettings.getDiscountPercent()));
+            loyaltyCombo.getItems().add(String.format("Complete %d more order(s) to unlock %.0f%% off", remaining,
+                    loyaltySettings.getDiscountPercent()));
             loyaltyCombo.setValue(loyaltyCombo.getItems().get(0));
             loyaltyCombo.setDisable(true);
-            loyaltyCalcLabel.setText(String.format("Progress: %d/%d orders completed", completedOrders, requiredOrders));
+            loyaltyCalcLabel
+                    .setText(String.format("Progress: %d/%d orders completed", completedOrders, requiredOrders));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
@@ -318,16 +344,17 @@ public class ShoppingCartController {
             double subtotal = cartManager.getSubtotal();
             double discountAmount = subtotal * (loyaltyDiscountPercent / 100.0);
             double newPrice = subtotal - discountAmount;
-            
+
             // Show calculation
             loyaltyCalcLabel.setText(String.format(
-                "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
-                subtotal, loyaltyDiscountPercent, newPrice, discountAmount));
+                    "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
+                    subtotal, loyaltyDiscountPercent, newPrice, discountAmount));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
         // Recalculate total discount
-        appliedDiscountPercent = loyaltyDiscountPercent + (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
+        appliedDiscountPercent = loyaltyDiscountPercent
+                + (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
         if (appliedDiscountPercent > 0) {
             discountLabel.setText(String.format("Total Discount (%.0f%%):", appliedDiscountPercent));
             discountRow.setVisible(true);
@@ -414,9 +441,40 @@ public class ShoppingCartController {
         discountRow.setVisible(true);
 
         couponCombo.setDisable(true);
+        removeCouponBtn.setVisible(true);
+        removeCouponBtn.setManaged(true);
         updateTotals();
 
         AlertUtils.showSuccess("Coupon applied: " + selected.getDiscountPercent() + "% off!");
+    }
+
+    /**
+     * Handles removing an applied coupon.
+     */
+    @FXML
+    private void handleRemoveCoupon(ActionEvent event) {
+        // Remove coupon discount
+        appliedCoupon = null;
+        appliedDiscountPercent = loyaltyDiscountPercent; // Keep only loyalty discount if any
+
+        // Update UI
+        couponCombo.setDisable(false);
+        couponCombo.setValue(null);
+        removeCouponBtn.setVisible(false);
+        removeCouponBtn.setManaged(false);
+
+        // Update discount display
+        if (appliedDiscountPercent > 0) {
+            discountLabel.setText(String.format("Discount (%.0f%%):", appliedDiscountPercent));
+            discountRow.setVisible(true);
+            discountRow.setManaged(true);
+        } else {
+            discountRow.setVisible(false);
+            discountRow.setManaged(false);
+        }
+
+        updateTotals();
+        AlertUtils.showInfo("Coupon Removed", "The coupon has been removed.");
     }
 
     /**
@@ -602,6 +660,8 @@ public class ShoppingCartController {
 
     /**
      * Sets the parent controller reference.
+     *
+     * @param controller The parent CustomerController
      */
     public void setParentController(CustomerController controller) {
         this.parentController = controller;

@@ -213,11 +213,14 @@ public class CouponDAO {
             stmt.setInt(1, userId);
             stmt.setInt(2, couponId);
 
+            System.out.println("DEBUG: Assigning coupon " + couponId + " to user " + userId);
             int rows = stmt.executeUpdate();
+            System.out.println("DEBUG: Rows affected: " + rows);
             return rows > 0;
 
         } catch (SQLException e) {
             System.err.println("Assign coupon error: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -235,6 +238,7 @@ public class CouponDAO {
                 "WHERE uc.user_id = ? AND uc.is_used = FALSE " +
                 "AND c.is_active = TRUE AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())";
 
+        System.out.println("DEBUG: findUserCoupons called for userId: " + userId);
         try {
             PreparedStatement stmt = db.prepareStatement(query);
             stmt.setInt(1, userId);
@@ -242,10 +246,14 @@ public class CouponDAO {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                coupons.add(extractCouponFromResultSet(rs));
+                Coupon c = extractCouponFromResultSet(rs);
+                System.out.println("DEBUG: Found coupon in DB: " + c.getCode());
+                coupons.add(c);
             }
+            System.out.println("DEBUG: Total coupons found: " + coupons.size());
         } catch (SQLException e) {
             System.err.println("Find user coupons error: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return coupons;

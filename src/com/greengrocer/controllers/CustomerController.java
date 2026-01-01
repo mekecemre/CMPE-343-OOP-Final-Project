@@ -60,6 +60,13 @@ public class CustomerController {
     private User currentUser;
 
     /**
+     * Default constructor for CustomerController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public CustomerController() {
+    }
+
+    /**
      * Initializes the controller.
      */
     @FXML
@@ -682,7 +689,7 @@ public class CustomerController {
 
         TabPane tabPane = new TabPane();
         tabPane.setPrefSize(500, 400);
-        
+
         // Create message list early so it can be referenced from send button
         ListView<Message> messageList = new ListView<>();
         messageList.getItems().addAll(messages);

@@ -10,6 +10,13 @@ package com.greengrocer.utils;
 public class ValidationUtils {
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private ValidationUtils() {
+    }
+
+    /**
      * Validates that a string is not null or empty.
      * 
      * @param value The string to validate

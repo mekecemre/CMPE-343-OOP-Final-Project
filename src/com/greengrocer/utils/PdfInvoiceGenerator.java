@@ -32,6 +32,13 @@ public class PdfInvoiceGenerator {
     private static Font TOTAL_FONT = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private PdfInvoiceGenerator() {
+    }
+
+    /**
      * Generates a PDF invoice as a byte array.
      * 
      * @param order           The order

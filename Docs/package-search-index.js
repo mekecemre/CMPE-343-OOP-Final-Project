@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"com.greengrocer"},{"l":"com.greengrocer.controllers"},{"l":"com.greengrocer.database"},{"l":"com.greengrocer.models"},{"l":"com.greengrocer.utils"}];updateSearchResults();

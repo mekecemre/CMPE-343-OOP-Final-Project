@@ -38,6 +38,13 @@ public class CarrierController {
     private User currentUser;
 
     /**
+     * Default constructor for CarrierController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public CarrierController() {
+    }
+
+    /**
      * Initializes the controller.
      */
     @FXML

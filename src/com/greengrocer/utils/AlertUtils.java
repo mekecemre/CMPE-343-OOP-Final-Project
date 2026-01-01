@@ -14,6 +14,13 @@ import java.util.Optional;
 public class AlertUtils {
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private AlertUtils() {
+    }
+
+    /**
      * Shows an information alert.
      * 
      * @param title   Alert title

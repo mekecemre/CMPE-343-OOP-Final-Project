@@ -53,6 +53,13 @@ public class RegistrationController {
     private UserDAO userDAO;
 
     /**
+     * Default constructor for RegistrationController.
+     * Called by JavaFX when loading the FXML file.
+     */
+    public RegistrationController() {
+    }
+
+    /**
      * Initializes the controller.
      */
     @FXML
