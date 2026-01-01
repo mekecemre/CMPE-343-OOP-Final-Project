@@ -143,6 +143,59 @@ public class ProductDAO {
     }
 
     /**
+     * Checks if a product with the given name already exists.
+     * 
+     * @param name The product name to check
+     * @return true if a product with this name exists
+     */
+    public boolean existsByName(String name) {
+        String query = "SELECT COUNT(*) FROM ProductInfo WHERE LOWER(name) = LOWER(?)";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setString(1, name.trim());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Check product exists error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a product with the given name exists, excluding a specific ID.
+     * Used when updating a product to allow keeping the same name.
+     * 
+     * @param name The product name to check
+     * @param excludeId The product ID to exclude from the check
+     * @return true if another product with this name exists
+     */
+    public boolean existsByNameExcluding(String name, int excludeId) {
+        String query = "SELECT COUNT(*) FROM ProductInfo WHERE LOWER(name) = LOWER(?) AND id != ?";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setString(1, name.trim());
+            stmt.setInt(2, excludeId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Check product exists error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
      * Adds a new product.
      * 
      * @param product The product to add

@@ -111,10 +111,11 @@ gradle-app.setting
 !gradle-wrapper.properties
 
 # Application-specific
-# Ignore all library files (platform-specific dependencies)
-# Each developer must download their own platform-specific versions
+# Ignore platform-specific libraries (JavaFX), but track platform-independent JARs
 lib/*
 !lib/.gitkeep
+!lib/mysql-connector-j-*.jar
+!lib/itextpdf-*.jar
 
 # Keep SQL scripts
 # sql/

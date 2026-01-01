@@ -48,6 +48,7 @@ public class LoginController {
     public void initialize() {
         userDAO = new UserDAO();
         errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     /**
@@ -116,6 +117,7 @@ public class LoginController {
      */
     private void showError(String message) {
         errorLabel.setText(message);
+        errorLabel.setManaged(true);
         errorLabel.setVisible(true);
     }
 }

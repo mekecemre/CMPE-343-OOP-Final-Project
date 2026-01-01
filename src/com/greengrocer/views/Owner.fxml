@@ -43,6 +43,9 @@
                     </HBox>
                     
                     <TableView fx:id="productsTable" VBox.vgrow="ALWAYS">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
                         <columns>
                             <TableColumn fx:id="prodIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="prodNameColumn" text="Name" prefWidth="120"/>
@@ -51,6 +54,7 @@
                             <TableColumn fx:id="prodStockColumn" text="Stock (kg)" prefWidth="80"/>
                             <TableColumn fx:id="prodThresholdColumn" text="Threshold" prefWidth="80"/>
                             <TableColumn fx:id="prodStatusColumn" text="Status" prefWidth="100"/>
+                            <TableColumn fx:id="prodImageColumn" text="Image" prefWidth="60" sortable="false"/>
                         </columns>
                     </TableView>
                 </VBox>
@@ -71,6 +75,9 @@
                     </HBox>
                     
                     <TableView fx:id="carriersTable" VBox.vgrow="ALWAYS">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
                         <columns>
                             <TableColumn fx:id="carrIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="carrUsernameColumn" text="Username" prefWidth="100"/>
@@ -99,6 +106,9 @@
                     </HBox>
                     
                     <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
                         <columns>
                             <TableColumn fx:id="ordIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="ordCustomerColumn" text="Customer" prefWidth="100"/>
@@ -120,17 +130,17 @@
                     </padding>
                     
                     <!-- Message List -->
-                    <VBox spacing="10" HBox.hgrow="ALWAYS">
+                    <VBox spacing="10" prefWidth="350" minWidth="300">
                         <Label text="Customer Messages" styleClass="section-title"/>
                         <ListView fx:id="messagesList" VBox.vgrow="ALWAYS"/>
                     </VBox>
                     
                     <!-- Message Detail/Reply -->
-                    <VBox spacing="10" prefWidth="400">
+                    <VBox spacing="10" HBox.hgrow="ALWAYS">
                         <Label text="Message Details" styleClass="section-title"/>
-                        <TextArea fx:id="messageContentArea" editable="false" prefRowCount="6" promptText="Select a message..."/>
+                        <TextArea fx:id="messageContentArea" editable="false" prefRowCount="10" VBox.vgrow="ALWAYS" promptText="Select a message..."/>
                         <Label text="Your Reply:" styleClass="field-label"/>
-                        <TextArea fx:id="replyArea" prefRowCount="4" promptText="Type your reply..."/>
+                        <TextArea fx:id="replyArea" prefRowCount="6" promptText="Type your reply..."/>
                         <Button text="Send Reply" onAction="#handleSendReply" styleClass="primary-button" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
@@ -152,6 +162,9 @@
                     </HBox>
                     
                     <TableView fx:id="couponsTable" VBox.vgrow="SOMETIMES" prefHeight="200">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
                         <columns>
                             <TableColumn fx:id="coupIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="coupCodeColumn" text="Code" prefWidth="120"/>
@@ -185,6 +198,9 @@
                     
                     <Label text="Carrier Ratings" styleClass="section-title"/>
                     <TableView fx:id="ratingsTable" VBox.vgrow="ALWAYS">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
                         <columns>
                             <TableColumn fx:id="rateCarrierColumn" text="Carrier" prefWidth="120"/>
                             <TableColumn fx:id="rateCustomerColumn" text="Customer" prefWidth="120"/>

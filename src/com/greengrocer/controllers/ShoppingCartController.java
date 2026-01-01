@@ -68,6 +68,12 @@ public class ShoppingCartController {
     private Button checkoutButton;
     @FXML
     private VBox couponSection;
+    @FXML
+    private VBox loyaltySection;
+    @FXML
+    private ComboBox<String> loyaltyCombo;
+    @FXML
+    private Label loyaltyCalcLabel;
 
     private CartManager cartManager;
     private ProductDAO productDAO;
@@ -81,8 +87,10 @@ public class ShoppingCartController {
     private CustomerController parentController;
 
     private double appliedDiscountPercent = 0;
+    private double loyaltyDiscountPercent = 0;
     private Coupon appliedCoupon = null;
     private LoyaltySettings loyaltySettings;
+    private boolean loyaltyEligible = false;
 
     /**
      * Initializes the controller.
@@ -256,19 +264,79 @@ public class ShoppingCartController {
     }
 
     /**
-     * Checks if user is eligible for loyalty discount.
+     * Checks if user is eligible for loyalty discount and populates dropdown.
      */
     private void checkLoyaltyDiscount() {
         if (loyaltySettings == null || currentUser == null) {
             return;
         }
-        if (loyaltySettings.isEligible(currentUser.getCompletedOrders())) {
-            appliedDiscountPercent = loyaltySettings.getDiscountPercent();
-            discountLabel.setText(String.format("Loyalty Discount (%.0f%%):", appliedDiscountPercent));
+        
+        // Always show loyalty section
+        loyaltySection.setVisible(true);
+        loyaltySection.setManaged(true);
+        loyaltyCombo.getItems().clear();
+        
+        int completedOrders = currentUser.getCompletedOrders();
+        int requiredOrders = loyaltySettings.getMinOrdersForDiscount();
+        
+        if (loyaltySettings.isEligible(completedOrders)) {
+            loyaltyEligible = true;
+            // User is eligible - show discount options
+            loyaltyCombo.getItems().add("No discount");
+            loyaltyCombo.getItems().add(String.format("Loyalty Discount: %.0f%% off", loyaltySettings.getDiscountPercent()));
+            loyaltyCombo.setValue("No discount");
+            loyaltyCalcLabel.setText(String.format("🎉 You have %d completed orders - discount unlocked!", completedOrders));
+            loyaltyCalcLabel.setVisible(true);
+            loyaltyCalcLabel.setManaged(true);
+        } else {
+            // User not eligible yet - show progress
+            loyaltyEligible = false;
+            int remaining = requiredOrders - completedOrders;
+            loyaltyCombo.getItems().add(String.format("Complete %d more order(s) to unlock %.0f%% off", remaining, loyaltySettings.getDiscountPercent()));
+            loyaltyCombo.setValue(loyaltyCombo.getItems().get(0));
+            loyaltyCombo.setDisable(true);
+            loyaltyCalcLabel.setText(String.format("Progress: %d/%d orders completed", completedOrders, requiredOrders));
+            loyaltyCalcLabel.setVisible(true);
+            loyaltyCalcLabel.setManaged(true);
+        }
+    }
+
+    /**
+     * Handles loyalty discount selection from dropdown.
+     */
+    @FXML
+    private void handleApplyLoyalty(ActionEvent event) {
+        String selected = loyaltyCombo.getValue();
+        if (selected == null || selected.equals("No discount")) {
+            // Remove loyalty discount
+            loyaltyDiscountPercent = 0;
+            loyaltyCalcLabel.setVisible(false);
+            loyaltyCalcLabel.setManaged(false);
+        } else {
+            // Apply loyalty discount
+            loyaltyDiscountPercent = loyaltySettings.getDiscountPercent();
+            double subtotal = cartManager.getSubtotal();
+            double discountAmount = subtotal * (loyaltyDiscountPercent / 100.0);
+            double newPrice = subtotal - discountAmount;
+            
+            // Show calculation
+            loyaltyCalcLabel.setText(String.format(
+                "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
+                subtotal, loyaltyDiscountPercent, newPrice, discountAmount));
+            loyaltyCalcLabel.setVisible(true);
+            loyaltyCalcLabel.setManaged(true);
+        }
+        // Recalculate total discount
+        appliedDiscountPercent = loyaltyDiscountPercent + (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
+        if (appliedDiscountPercent > 0) {
+            discountLabel.setText(String.format("Total Discount (%.0f%%):", appliedDiscountPercent));
             discountRow.setVisible(true);
             discountRow.setManaged(true);
-            updateTotals();
+        } else {
+            discountRow.setVisible(false);
+            discountRow.setManaged(false);
         }
+        updateTotals();
     }
 
     /**
@@ -341,7 +409,7 @@ public class ShoppingCartController {
 
         // Add coupon discount to existing loyalty discount
         appliedCoupon = selected;
-        appliedDiscountPercent += selected.getDiscountPercent();
+        appliedDiscountPercent = loyaltyDiscountPercent + selected.getDiscountPercent();
         discountLabel.setText(String.format("Discount (%.0f%%):", appliedDiscountPercent));
         discountRow.setVisible(true);
 

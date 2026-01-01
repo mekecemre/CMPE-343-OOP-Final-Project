@@ -12,14 +12,54 @@
 
 /* ==================== CONTAINERS ==================== */
 .main-container {
-    -fx-background-color: #f5f6fa;
+    -fx-background-color: #1abc9c;
 }
 
-.login-box, .registration-box {
+.login-box,
+.registration-box {
     -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);
-    -fx-max-width: 450px;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 25, 0, 0, 8);
+}
+
+.login-header {
+    -fx-background-color: white;
+    -fx-background-radius: 16 16 0 0;
+}
+
+.welcome-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.form-section {
+    -fx-background-color: white;
+    -fx-background-radius: 0 0 16 16;
+}
+
+.signin-button {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-padding: 10px;
+    -fx-cursor: hand;
+}
+
+.signin-button:hover {
+    -fx-background-color: #219a52;
+}
+
+.signup-link {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: bold;
+}
+
+.login-divider {
+    -fx-background-color: #e0e0e0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 3, 0, 0, 1);
 }
 
 .form-container {
@@ -80,15 +120,17 @@
 }
 
 /* ==================== FORM ELEMENTS ==================== */
-.text-field, .password-field {
+.text-field,
+.password-field {
     -fx-background-color: #ecf0f1;
     -fx-background-radius: 5;
-    -fx-padding: 10px;
+    -fx-padding: 8px;
     -fx-border-color: transparent;
     -fx-border-radius: 5;
 }
 
-.text-field:focused, .password-field:focused {
+.text-field:focused,
+.password-field:focused {
     -fx-background-color: white;
     -fx-border-color: #27ae60;
     -fx-border-width: 2;
@@ -101,7 +143,7 @@
 }
 
 .search-field {
-    -fx-background-color: rgba(255,255,255,0.9);
+    -fx-background-color: rgba(255, 255, 255, 0.9);
     -fx-background-radius: 20;
     -fx-padding: 8px 15px;
 }
@@ -174,7 +216,7 @@
 }
 
 .menu-button {
-    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-background-color: rgba(255, 255, 255, 0.2);
     -fx-text-fill: white;
 }
 
@@ -191,12 +233,12 @@
 .product-card {
     -fx-background-color: white;
     -fx-background-radius: 8;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 2);
     -fx-padding: 10px;
 }
 
 .product-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(39,174,96,0.3), 15, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(39, 174, 96, 0.3), 15, 0, 0, 3);
 }
 
 .product-name {
@@ -338,7 +380,12 @@
 }
 
 .table-row-cell:selected {
-    -fx-background-color: #d5f5e3;
+    -fx-background-color: #1e8449;
+    -fx-text-background-color: white;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: white;
 }
 
 /* ==================== LIST VIEWS ==================== */
@@ -348,7 +395,12 @@
 }
 
 .list-cell:filled:selected {
-    -fx-background-color: #d5f5e3;
+    -fx-background-color: #1e8449;
+    -fx-text-fill: white;
+}
+
+.list-cell:filled:selected .text {
+    -fx-fill: white;
 }
 
 /* ==================== SCROLL PANES ==================== */
@@ -356,7 +408,7 @@
     -fx-background-color: transparent;
 }
 
-.scroll-pane > .viewport {
+.scroll-pane>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -369,12 +421,12 @@
     -fx-background-color: white;
 }
 
-.titled-pane > .title {
+.titled-pane>.title {
     -fx-background-color: #27ae60;
     -fx-background-radius: 8 8 0 0;
 }
 
-.titled-pane > .title > .text {
+.titled-pane>.title>.text {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-fill: white;
@@ -414,7 +466,7 @@
     -fx-background-color: white;
 }
 
-.dialog-pane > .button-bar > .container {
+.dialog-pane>.button-bar>.container {
     -fx-background-color: #f8f9fa;
 }
 
@@ -431,7 +483,7 @@
 }
 
 /* ==================== TAB PANE ==================== */
-.tab-pane > .tab-header-area > .tab-header-background {
+.tab-pane>.tab-header-area>.tab-header-background {
     -fx-background-color: #ecf0f1;
 }
 

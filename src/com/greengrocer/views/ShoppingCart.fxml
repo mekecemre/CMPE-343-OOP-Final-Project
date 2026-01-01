@@ -26,14 +26,14 @@
             </padding>
             
             <!-- Cart Items Section -->
-            <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
+            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 8;">
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
                 
                 <Label text="Cart Items" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                 
-                <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                <TableView fx:id="cartTable" prefHeight="240" maxHeight="240" style="-fx-background-color: transparent;">
                     <columns>
                         <TableColumn fx:id="imageColumn" text="" prefWidth="55" minWidth="55" maxWidth="55" sortable="false" resizable="false"/>
                         <TableColumn fx:id="productColumn" text="Product" prefWidth="160" minWidth="120"/>
@@ -50,11 +50,20 @@
             
             <!-- Order Summary Card -->
             <HBox spacing="20">
-                <!-- Left side: Coupon + Delivery -->
+                <!-- Left side: Loyalty + Coupon + Delivery -->
                 <VBox spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
                     <padding>
                         <Insets top="15" right="15" bottom="15" left="15"/>
                     </padding>
+                    
+                    <!-- Loyalty Discount Section -->
+                    <VBox spacing="8" fx:id="loyaltySection" visible="false" managed="false">
+                        <Label text="Loyalty Discount" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <ComboBox fx:id="loyaltyCombo" promptText="Select discount..." prefWidth="200" onAction="#handleApplyLoyalty"/>
+                        </HBox>
+                        <Label fx:id="loyaltyCalcLabel" text="" style="-fx-text-fill: #27ae60; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
                     
                     <!-- Coupon Section -->
                     <VBox spacing="8" fx:id="couponSection">

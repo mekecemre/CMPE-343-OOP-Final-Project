@@ -682,6 +682,10 @@ public class CustomerController {
 
         TabPane tabPane = new TabPane();
         tabPane.setPrefSize(500, 400);
+        
+        // Create message list early so it can be referenced from send button
+        ListView<Message> messageList = new ListView<>();
+        messageList.getItems().addAll(messages);
 
         // Send Message Tab
         Tab sendTab = new Tab("Send Message");
@@ -711,6 +715,9 @@ public class CustomerController {
                 AlertUtils.showSuccess("Message sent successfully!");
                 subjectField.clear();
                 messageField.clear();
+                // Refresh message list
+                messageList.getItems().clear();
+                messageList.getItems().addAll(messageDAO.findBySender(currentUser.getId()));
             }
         });
 
@@ -727,9 +734,6 @@ public class CustomerController {
 
         VBox viewContent = new VBox(10);
         viewContent.setPadding(new Insets(15));
-
-        ListView<Message> messageList = new ListView<>();
-        messageList.getItems().addAll(messages);
         messageList.setCellFactory(lv -> new ListCell<Message>() {
             @Override
             protected void updateItem(Message msg, boolean empty) {
