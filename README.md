@@ -336,7 +336,7 @@ java --module-path %PATH_TO_FX% --add-modules javafx.controls,javafx.fxml -cp "o
 1. Button Click - Login, Add to Cart, Checkout, etc.
 2. TextField Change - Real-time product search
 3. ListView Selection - Order/message selection
-4. ComboBox Selection - Order status filter
+4. ComboBox Selection - Order status filter,Loyalty discount selection
 5. DatePicker Selection - Delivery date selection
 6. TableView Selection - Product/carrier selection
 7. Window Close - Logout confirmation
