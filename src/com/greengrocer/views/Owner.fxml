@@ -172,6 +172,7 @@
                             <TableColumn fx:id="coupMinColumn" text="Min Order" prefWidth="80"/>
                             <TableColumn fx:id="coupExpiryColumn" text="Expiry Date" prefWidth="100"/>
                             <TableColumn fx:id="coupActiveColumn" text="Active" prefWidth="60"/>
+                            <TableColumn fx:id="coupStatusColumn" text="Status" prefWidth="80"/>
                         </columns>
                     </TableView>
                     

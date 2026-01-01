@@ -117,10 +117,10 @@ public class ValidationUtils {
     }
 
     /**
-     * Validates that a phone number contains only digits and is reasonable length.
+     * Validates that a phone number contains exactly 11 digits.
      * 
      * @param phone The phone number to validate
-     * @return true if valid format
+     * @return true if valid format (exactly 11 digits)
      */
     public static boolean isValidPhone(String phone) {
         if (!isNotEmpty(phone)) {
@@ -130,8 +130,8 @@ public class ValidationUtils {
         // Remove common separators
         String cleaned = phone.replaceAll("[\\s\\-\\(\\)]", "");
 
-        // Check if remaining is digits and reasonable length
-        return cleaned.matches("\\d{7,15}");
+        // Check if remaining is exactly 11 digits
+        return cleaned.matches("\\d{11}");
     }
 
     /**

@@ -116,6 +116,8 @@ public class OwnerController {
     @FXML
     private TableColumn<Coupon, String> coupActiveColumn;
     @FXML
+    private TableColumn<Coupon, String> coupStatusColumn;
+    @FXML
     private TextField loyaltyOrdersField;
     @FXML
     private TextField loyaltyDiscountField;
@@ -708,6 +710,20 @@ public class OwnerController {
                 data.getValue().getExpiryDate() != null ? data.getValue().getExpiryDate().toString() : "No expiry"));
         coupActiveColumn
                 .setCellValueFactory(data -> new SimpleStringProperty(data.getValue().isActive() ? "Yes" : "No"));
+
+        // Status column shows overall coupon status
+        coupStatusColumn.setCellValueFactory(data -> {
+            Coupon coupon = data.getValue();
+            String status;
+            if (!coupon.isActive()) {
+                status = "Inactive";
+            } else if (coupon.getExpiryDate() != null && coupon.getExpiryDate().isBefore(java.time.LocalDate.now())) {
+                status = "Expired";
+            } else {
+                status = "Active";
+            }
+            return new SimpleStringProperty(status);
+        });
     }
 
     private void loadCoupons() {
