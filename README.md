@@ -162,38 +162,51 @@ The `.vscode/` directory is also excluded from git as it contains user-specific 
 
 ### 3. Database Setup
 
+The SQL file automatically creates the database, user, and all tables. Just run it as the MySQL/MariaDB **root** user.
+
+#### Windows Users (MySQL)
+
 1. Start MySQL Server
-2. Login to MySQL:
+2. Run the schema script as root:
+   ```cmd
+   mysql -u root -p < sql\Group17.sql
    ```
-   mysql -u root -p
-   ```
-3. Create the application user:
-   ```sql
-   CREATE USER 'myuser'@'localhost' IDENTIFIED BY '1234';
-   GRANT ALL PRIVILEGES ON greengrocer.* TO 'myuser'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
-4. Run the schema script:
-The SQL file automatically creates the database, user, and all tables. Just run it as the MySQL **root** user:
+3. Enter your root password when prompted
 
-**Option 1: Command Line**
-```bash
-   # MySQL
-   mysql -u myuser -p1234 < sql/Group17.sql
+**Alternative: MySQL Workbench / phpMyAdmin**
+1. Connect as root user
+2. Open and execute `sql/Group17.sql`
+
+#### Linux Users (MariaDB/MySQL)
+
+1. Ensure MariaDB/MySQL is running:
+   ```bash
+   sudo systemctl start mariadb
+   # or for MySQL
+   sudo systemctl start mysql
+   ```
+
+2. **If database already exists from previous setup, drop it first (recommended for clean state):**
+   ```bash
+   sudo mariadb -u root -p -e "DROP DATABASE IF EXISTS greengrocer;"
+   ```
+
+3. Run the schema script as root:
+   ```bash
+   # For MariaDB
+   sudo mariadb -u root -p < sql/Group17.sql
    
-   # Or MariaDB
-   mariadb -u myuser -p1234 < sql/Group17.sql
+   # For MySQL
+   sudo mysql -u root -p < sql/Group17.sql
    ```
+4. Enter your root password when prompted (if set)
 
-   # Run as root user (the SQL file creates 'myuser' automatically)
-   mysql -u root -p < sql/Group17.sql
-   ```
-
-   **Option 2: MySQL Workbench / phpMyAdmin**
-   1. Connect as root user
-   2. Open and execute `sql/Group17.sql`
-
-   > **Note**: The script creates user `myuser` with password `1234`. If you get "Access denied" errors when running the app, make sure you ran the SQL file as **root**, not as myuser.
+> **Important Notes:**
+> - The SQL script creates user `myuser` with password `1234` automatically
+> - The script creates the `greengrocer` database and all tables
+> - Always run the script as **root** user, not as `myuser`
+> - If you get "Duplicate entry" errors, drop the database first (see step 2)
+> - If you get "Access denied" errors when running the app, verify the script was run as root
 
    ## Compilation Instructions
 
