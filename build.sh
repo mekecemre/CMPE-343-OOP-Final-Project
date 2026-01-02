@@ -79,6 +79,11 @@ if [ -d "$SRC_DIR/com/greengrocer/styles" ]; then
     cp -r "$SRC_DIR/com/greengrocer/styles/"* "$OUT_DIR/com/greengrocer/styles/" 2>/dev/null || true
 fi
 
+if [ -d "$SRC_DIR/com/greengrocer/images" ]; then
+    mkdir -p "$OUT_DIR/com/greengrocer/images"
+    cp -r "$SRC_DIR/com/greengrocer/images/"* "$OUT_DIR/com/greengrocer/images/" 2>/dev/null || true
+fi
+
 echo ""
 echo "========================================"
 echo "   Build Successful!"
