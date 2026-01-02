@@ -685,6 +685,15 @@ public class OwnerController {
                     return null;
                 }
 
+                // Validate password strength
+                String passwordError = ValidationUtils.getPasswordError(
+                    passwordField.getText()
+                );
+                if (passwordError != null) {
+                    AlertUtils.showValidationError(passwordError);
+                    return null;
+                }
+
                 User carrier = new User();
                 carrier.setUsername(usernameField.getText().trim());
                 carrier.setPassword(passwordField.getText());

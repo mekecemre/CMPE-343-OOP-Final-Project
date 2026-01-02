@@ -3,7 +3,7 @@ package com.greengrocer.utils;
 /**
  * Utility class for input validation.
  * Provides methods to validate user inputs.
- * 
+ *
  * @author Group17
  * @version 1.0
  */
@@ -13,12 +13,11 @@ public class ValidationUtils {
      * Private constructor to prevent instantiation.
      * This is a utility class with only static methods.
      */
-    private ValidationUtils() {
-    }
+    private ValidationUtils() {}
 
     /**
      * Validates that a string is not null or empty.
-     * 
+     *
      * @param value The string to validate
      * @return true if valid (not null and not empty)
      */
@@ -28,7 +27,7 @@ public class ValidationUtils {
 
     /**
      * Validates that a string can be parsed as a positive double.
-     * 
+     *
      * @param value The string to validate
      * @return true if valid positive double
      */
@@ -47,7 +46,7 @@ public class ValidationUtils {
 
     /**
      * Parses a string to double, returning 0 if invalid.
-     * 
+     *
      * @param value The string to parse
      * @return Parsed double or 0 if invalid
      */
@@ -65,7 +64,7 @@ public class ValidationUtils {
 
     /**
      * Parses a string to int, returning 0 if invalid.
-     * 
+     *
      * @param value The string to parse
      * @return Parsed int or 0 if invalid
      */
@@ -83,7 +82,7 @@ public class ValidationUtils {
 
     /**
      * Validates that a double value is positive (greater than 0).
-     * 
+     *
      * @param value The value to validate
      * @return true if positive
      */
@@ -93,7 +92,7 @@ public class ValidationUtils {
 
     /**
      * Validates that an int value is positive (greater than 0).
-     * 
+     *
      * @param value The value to validate
      * @return true if positive
      */
@@ -103,7 +102,7 @@ public class ValidationUtils {
 
     /**
      * Validates that an email has basic format.
-     * 
+     *
      * @param email The email to validate
      * @return true if basic format is valid
      */
@@ -118,7 +117,7 @@ public class ValidationUtils {
 
     /**
      * Validates that a phone number contains exactly 11 digits.
-     * 
+     *
      * @param phone The phone number to validate
      * @return true if valid format (exactly 11 digits)
      */
@@ -136,7 +135,7 @@ public class ValidationUtils {
 
     /**
      * Formats a price for display.
-     * 
+     *
      * @param price The price value
      * @return Formatted price string
      */
@@ -146,7 +145,7 @@ public class ValidationUtils {
 
     /**
      * Formats a quantity for display.
-     * 
+     *
      * @param quantity The quantity in kg
      * @return Formatted quantity string
      */
@@ -156,9 +155,8 @@ public class ValidationUtils {
 
     /**
      * Validates password strength.
-     * Password must be at least 8 characters, contain uppercase, lowercase, and a
-     * number.
-     * 
+     * Password must be at least 6 characters and contain both uppercase and lowercase letters.
+     *
      * @param password The password to validate
      * @return true if password meets all requirements
      */
@@ -167,8 +165,8 @@ public class ValidationUtils {
             return false;
         }
 
-        // Minimum 8 characters
-        if (password.length() < 8) {
+        // Minimum 6 characters
+        if (password.length() < 6) {
             return false;
         }
 
@@ -196,33 +194,21 @@ public class ValidationUtils {
             return false;
         }
 
-        // Check for digit
-        boolean hasDigit = false;
-        for (char c : password.toCharArray()) {
-            if (Character.isDigit(c)) {
-                hasDigit = true;
-                break;
-            }
-        }
-        if (!hasDigit) {
-            return false;
-        }
-
         return true;
     }
 
     /**
      * Gets a message describing password requirements.
-     * 
+     *
      * @return Password requirements description
      */
     public static String getPasswordRequirements() {
-        return "Password must be at least 8 characters with uppercase, lowercase, and a number.";
+        return "Password must be at least 6 characters with uppercase and lowercase letters.";
     }
 
     /**
      * Gets detailed password validation error message.
-     * 
+     *
      * @param password The password to check
      * @return Error message or null if valid
      */
@@ -231,21 +217,16 @@ public class ValidationUtils {
             return "Password is required.";
         }
 
-        if (password.length() < 8) {
-            return "Password must be at least 8 characters long.";
+        if (password.length() < 6) {
+            return "Password must be at least 6 characters long.";
         }
 
         boolean hasUppercase = false;
         boolean hasLowercase = false;
-        boolean hasDigit = false;
 
         for (char c : password.toCharArray()) {
-            if (Character.isUpperCase(c))
-                hasUppercase = true;
-            if (Character.isLowerCase(c))
-                hasLowercase = true;
-            if (Character.isDigit(c))
-                hasDigit = true;
+            if (Character.isUpperCase(c)) hasUppercase = true;
+            if (Character.isLowerCase(c)) hasLowercase = true;
         }
 
         if (!hasUppercase) {
@@ -253,9 +234,6 @@ public class ValidationUtils {
         }
         if (!hasLowercase) {
             return "Password must contain at least one lowercase letter.";
-        }
-        if (!hasDigit) {
-            return "Password must contain at least one number.";
         }
 
         return null; // Password is valid
