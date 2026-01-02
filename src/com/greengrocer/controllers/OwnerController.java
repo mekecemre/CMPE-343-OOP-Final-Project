@@ -107,6 +107,9 @@ public class OwnerController {
     private TableColumn<Order, String> ordCarrierColumn;
 
     @FXML
+    private TableColumn<Order, String> ordStatusTimeColumn;
+
+    @FXML
     private TableColumn<Order, Double> ordTotalColumn;
 
     @FXML
@@ -779,6 +782,20 @@ public class OwnerController {
         ordStatusColumn.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getStatus())
         );
+        ordStatusTimeColumn.setCellValueFactory(data -> {
+            Order order = data.getValue();
+            String timeInfo = "-";
+            if (order.getDeliveryTime() != null) {
+                timeInfo = order.getDeliveryTime().format(dateFormatter);
+            } else if (order.getStatus().equals("PENDING")) {
+                timeInfo = "Waiting...";
+            } else if (order.getStatus().equals("SELECTED")) {
+                timeInfo = "In Transit";
+            } else if (order.getStatus().equals("CANCELLED")) {
+                timeInfo = "Cancelled";
+            }
+            return new SimpleStringProperty(timeInfo);
+        });
         ordCarrierColumn.setCellValueFactory(data ->
             new SimpleStringProperty(
                 data.getValue().getCarrierName() != null
