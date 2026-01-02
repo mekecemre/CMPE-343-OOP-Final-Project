@@ -44,8 +44,9 @@ public class CarrierController {
     private ListView<Order> completedOrdersList;
 
     private OrderDAO orderDAO;
-    private RatingDAO ratingDAO;
     private UserDAO userDAO;
+    private RatingDAO ratingDAO;
+    private MessageDAO messageDAO;
     private User currentUser;
 
     /**
@@ -62,6 +63,7 @@ public class CarrierController {
         orderDAO = new OrderDAO();
         ratingDAO = new RatingDAO();
         userDAO = new UserDAO();
+        messageDAO = new MessageDAO();
         currentUser = SessionManager.getInstance().getCurrentUser();
 
         usernameLabel.setText("Carrier: " + currentUser.getUsername());
@@ -361,13 +363,39 @@ public class CarrierController {
                 // Update customer's completed orders count
                 userDAO.incrementCompletedOrders(selected.getUserId());
 
+                // Send notification to customer
+                String notificationSubject =
+                    "Order #" + selected.getId() + " Delivered";
+                String notificationContent = String.format(
+                    "Your order #%d has been delivered successfully at %s.\n\n" +
+                        "Total: $%.2f\n\n" +
+                        "Thank you for shopping with us!\n\n" +
+                        "You can rate your delivery experience from your orders page.",
+                    selected.getId(),
+                    deliveryTime.format(
+                        java.time.format.DateTimeFormatter.ofPattern(
+                            "yyyy-MM-dd HH:mm"
+                        )
+                    ),
+                    selected.getTotalCost()
+                );
+
+                Message notification = new Message(
+                    currentUser.getId(),
+                    selected.getUserId(),
+                    notificationSubject,
+                    notificationContent
+                );
+                messageDAO.send(notification);
+
                 AlertUtils.showSuccess(
                     "Delivery completed successfully at " +
                         deliveryTime.format(
                             java.time.format.DateTimeFormatter.ofPattern(
                                 "yyyy-MM-dd HH:mm"
                             )
-                        )
+                        ) +
+                        "\n\nCustomer has been notified."
                 );
                 loadOrders();
                 updateRating();
