@@ -361,6 +361,12 @@
     -fx-text-fill: #27ae60;
 }
 
+.stat-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3498db;
+}
+
 /* ==================== TABLES ==================== */
 .table-view {
     -fx-background-color: white;
