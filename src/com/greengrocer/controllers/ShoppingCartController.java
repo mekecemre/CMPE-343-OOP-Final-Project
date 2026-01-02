@@ -104,6 +104,7 @@ public class ShoppingCartController {
     private UserDAO userDAO;
     private CouponDAO couponDAO;
     private LoyaltySettingsDAO loyaltySettingsDAO;
+    private MessageDAO messageDAO;
     private User currentUser;
 
     /** Reference to parent controller - kept for potential future use */
@@ -136,9 +137,10 @@ public class ShoppingCartController {
         cartManager = CartManager.getInstance();
         productDAO = new ProductDAO();
         orderDAO = new OrderDAO();
-        userDAO = new UserDAO();
         couponDAO = new CouponDAO();
         loyaltySettingsDAO = new LoyaltySettingsDAO();
+        messageDAO = new MessageDAO();
+        userDAO = new UserDAO();
         currentUser = SessionManager.getInstance().getCurrentUser();
         loyaltySettings = loyaltySettingsDAO.getSettings();
 
@@ -754,9 +756,15 @@ public class ShoppingCartController {
         int orderId = orderDAO.create(order);
 
         if (orderId > 0) {
-            // Update stock
+            // Update stock and check for notifications
             for (CartItem item : cartManager.getItems()) {
                 productDAO.updateStock(item.getProductId(), item.getQuantity());
+
+                // Check if stock ran out and notify owner
+                Product product = productDAO.findById(item.getProductId());
+                if (product != null && product.getStock() <= 0) {
+                    notifyOwnerStockOut(product);
+                }
             }
 
             // Mark coupon as used if applied
@@ -788,6 +796,43 @@ public class ShoppingCartController {
     }
 
     /**
+     * Notifies the owner when a product stock runs out.
+     *
+     * @param product The product that ran out of stock
+     */
+    private void notifyOwnerStockOut(Product product) {
+        // Find the owner user
+        User owner = userDAO.getOwner();
+        if (owner == null) {
+            return;
+        }
+
+        String subject =
+            "⚠️ Stock Alert: " + product.getName() + " is OUT OF STOCK";
+        String content = String.format(
+            "STOCK ALERT\n\n" +
+                "Product: %s\n" +
+                "Type: %s\n" +
+                "Current Stock: %.2f kg\n" +
+                "Status: OUT OF STOCK\n\n" +
+                "Action Required: Please restock this product as soon as possible.\n\n" +
+                "This notification was automatically generated after a customer order.",
+            product.getName(),
+            product.getType(),
+            product.getStock()
+        );
+
+        Message notification = new Message(
+            currentUser.getId(),
+            owner.getId(),
+            subject,
+            content
+        );
+        messageDAO.send(notification);
+    }
+
+    /**
+     * Shows the invoice in a dialog with option to save as PDF.
      * Shows the order summary confirmation dialog.
      */
     private boolean showOrderSummary(LocalDateTime deliveryTime) {
