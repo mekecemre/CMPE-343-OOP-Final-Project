@@ -758,12 +758,28 @@ public class ShoppingCartController {
         if (orderId > 0) {
             // Update stock and check for notifications
             for (CartItem item : cartManager.getItems()) {
+                // Get product state before stock update
+                Product productBefore = productDAO.findById(
+                    item.getProductId()
+                );
+                boolean wasAboveThreshold =
+                    productBefore != null &&
+                    productBefore.getStock() > productBefore.getThreshold();
+
+                // Update stock
                 productDAO.updateStock(item.getProductId(), item.getQuantity());
 
-                // Check if stock ran out and notify owner
-                Product product = productDAO.findById(item.getProductId());
-                if (product != null && product.getStock() <= 0) {
-                    notifyOwnerStockOut(product);
+                // Get product state after stock update
+                Product productAfter = productDAO.findById(item.getProductId());
+                if (productAfter != null) {
+                    // Check if stock ran out
+                    if (productAfter.getStock() <= 0) {
+                        notifyOwnerStockOut(productAfter);
+                    }
+                    // Check if stock just crossed below threshold (price doubled)
+                    else if (wasAboveThreshold && productAfter.isLowStock()) {
+                        notifyOwnerThresholdDoubled(productAfter);
+                    }
                 }
             }
 
@@ -820,6 +836,49 @@ public class ShoppingCartController {
             product.getName(),
             product.getType(),
             product.getStock()
+        );
+
+        Message notification = new Message(
+            currentUser.getId(),
+            owner.getId(),
+            subject,
+            content
+        );
+        messageDAO.send(notification);
+    }
+
+    /**
+     * Notifies the owner when a product's price is doubled due to low stock.
+     *
+     * @param product The product that fell below threshold
+     */
+    private void notifyOwnerThresholdDoubled(Product product) {
+        // Find the owner user
+        User owner = userDAO.getOwner();
+        if (owner == null) {
+            return;
+        }
+
+        String subject =
+            "⚠️ Price Alert: " + product.getName() + " - PRICE DOUBLED";
+        String content = String.format(
+            "THRESHOLD ALERT\n\n" +
+                "Product: %s\n" +
+                "Type: %s\n" +
+                "Current Stock: %.2f kg\n" +
+                "Threshold: %.2f kg\n" +
+                "Status: LOW STOCK - PRICE DOUBLED\n\n" +
+                "Original Price: $%.2f/kg\n" +
+                "Current Price: $%.2f/kg (2x)\n\n" +
+                "The stock has fallen below the threshold. The price has been automatically doubled for customers.\n\n" +
+                "Action Required: Consider restocking this product soon.\n\n" +
+                "This notification was automatically generated after a customer order.",
+            product.getName(),
+            product.getType(),
+            product.getStock(),
+            product.getThreshold(),
+            product.getPrice(),
+            product.getDisplayPrice()
         );
 
         Message notification = new Message(
