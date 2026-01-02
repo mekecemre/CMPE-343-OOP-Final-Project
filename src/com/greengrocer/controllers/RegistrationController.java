@@ -160,21 +160,7 @@ public class RegistrationController {
             }
         });
 
-        // Address validation - not empty
-        addressField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.isEmpty()) {
-                addressField.setStyle(NEUTRAL_STYLE);
-                addressHint.setText("");
-            } else if (newVal.trim().length() < 10) {
-                addressField.setStyle(INVALID_STYLE);
-                addressHint.setStyle(INVALID_TEXT_STYLE);
-                addressHint.setText("✗ Please enter a complete address");
-            } else {
-                addressField.setStyle(VALID_STYLE);
-                addressHint.setStyle(VALID_TEXT_STYLE);
-                addressHint.setText("✓ Valid address");
-            }
-        });
+        // Address - no visual validation, just check if not empty during registration
 
         // Phone validation - exactly 11 digits
         phoneField.textProperty().addListener((obs, oldVal, newVal) -> {

@@ -80,12 +80,12 @@ CREATE TABLE IF NOT EXISTS OrderInfo (
 CREATE TABLE IF NOT EXISTS OrderItems (
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
-    product_id INT NOT NULL,
+    product_id INT,
     product_name VARCHAR(100) NOT NULL,
     quantity DOUBLE NOT NULL,
     price_at_time DOUBLE NOT NULL,
     FOREIGN KEY (order_id) REFERENCES OrderInfo(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES ProductInfo(id)
+    FOREIGN KEY (product_id) REFERENCES ProductInfo(id) ON DELETE SET NULL
 );
 
 -- ============================================

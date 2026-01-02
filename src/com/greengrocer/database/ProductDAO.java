@@ -279,19 +279,43 @@ public class ProductDAO {
     }
 
     /**
-     * Deletes a product.
+     * Deletes a product if it's not in any active orders.
+     * Products in PENDING or SELECTED orders cannot be deleted.
+     * For completed orders (DELIVERED/CANCELLED), the product reference is cleared.
      * 
      * @param id The product ID to delete
-     * @return true if successful
+     * @return true if successful, false if product is in active orders or error
+     *         occurs
      */
     public boolean delete(int id) {
-        String query = "DELETE FROM ProductInfo WHERE id = ?";
+        // First check if product is in any active orders (PENDING or SELECTED)
+        String checkActiveQuery = "SELECT COUNT(*) FROM OrderItems oi " +
+                "JOIN OrderInfo o ON oi.order_id = o.id " +
+                "WHERE oi.product_id = ? AND o.status IN ('PENDING', 'SELECTED')";
 
         try {
-            PreparedStatement stmt = db.prepareStatement(query);
-            stmt.setInt(1, id);
+            PreparedStatement checkStmt = db.prepareStatement(checkActiveQuery);
+            checkStmt.setInt(1, id);
+            ResultSet rs = checkStmt.executeQuery();
 
-            int rows = stmt.executeUpdate();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.err.println("Cannot delete product: it is in active orders");
+                return false;
+            }
+
+            // Clear product_id in completed order items (preserve order history with
+            // product_name)
+            String clearQuery = "UPDATE OrderItems SET product_id = NULL WHERE product_id = ?";
+            PreparedStatement clearStmt = db.prepareStatement(clearQuery);
+            clearStmt.setInt(1, id);
+            clearStmt.executeUpdate();
+
+            // Now delete the product
+            String deleteQuery = "DELETE FROM ProductInfo WHERE id = ?";
+            PreparedStatement deleteStmt = db.prepareStatement(deleteQuery);
+            deleteStmt.setInt(1, id);
+
+            int rows = deleteStmt.executeUpdate();
             return rows > 0;
 
         } catch (SQLException e) {

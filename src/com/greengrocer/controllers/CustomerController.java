@@ -638,10 +638,11 @@ public class CustomerController {
                                         if (orderDAO.cancelOrder(
                                                 order.getId())) {
                                             AlertUtils.showSuccess(
-                                                    "Order cancelled successfully.");
+                                                    "Order cancelled successfully. Stock has been restored.");
                                             orderList
                                                     .getItems()
                                                     .remove(order);
+                                            loadProducts(); // Refresh product display to show updated stock
                                         } else {
                                             AlertUtils.showError(
                                                     "Cannot Cancel",
@@ -689,6 +690,9 @@ public class CustomerController {
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.showAndWait();
+
+        // Refresh products in case an order was cancelled (restoring stock)
+        loadProducts();
     }
 
     /**

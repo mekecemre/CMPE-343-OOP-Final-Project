@@ -307,9 +307,31 @@ public class ShoppingCartController {
     }
 
     /**
-     * Loads product image from resources.
+     * Loads product image from database or resources.
      */
     private void loadProductImage(ImageView imageView, String productName) {
+        // First, try to get the product from the database to retrieve the image
+        for (CartItem item : cartManager.getItems()) {
+            if (item.getProductName().equals(productName)) {
+                Product product = item.getProduct();
+                byte[] imageBytes = product.getImage();
+
+                if (imageBytes != null && imageBytes.length > 0) {
+                    try {
+                        Image image = new Image(new java.io.ByteArrayInputStream(imageBytes));
+                        if (image != null && !image.isError()) {
+                            imageView.setImage(image);
+                            return;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error loading image from database: " + e.getMessage());
+                    }
+                }
+                break;
+            }
+        }
+
+        // Fallback: try to load from resources
         String baseName = productName.toLowerCase().replace(" ", "_");
         String[] extensions = { ".png", ".jpg", ".jpeg" };
 

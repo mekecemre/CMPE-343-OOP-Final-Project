@@ -479,8 +479,8 @@ public class OwnerController {
                 loadProducts();
             } else {
                 AlertUtils.showError(
-                        "Error",
-                        "Could not delete product. It may be in use.");
+                        "Cannot Delete",
+                        "Product is in active orders (pending or selected for delivery).");
             }
         }
     }
@@ -1015,7 +1015,12 @@ public class OwnerController {
     }
 
     private void loadCoupons() {
+        System.out.println("DEBUG: Loading coupons from database...");
         List<Coupon> coupons = couponDAO.findAll();
+        System.out.println("DEBUG: Found " + coupons.size() + " coupons");
+        for (Coupon c : coupons) {
+            System.out.println("DEBUG: - " + c.getCode() + " (" + c.getDiscountPercent() + "%)");
+        }
         couponsTable.setItems(FXCollections.observableArrayList(coupons));
     }
 
@@ -1051,7 +1056,7 @@ public class OwnerController {
         grid.add(minOrderField, 1, 2);
         grid.add(new Label("Max Usage (0=unlimited):"), 0, 3);
         grid.add(maxUsageField, 1, 3);
-        grid.add(new Label("Expiry Date:"), 0, 4);
+        grid.add(new Label("Expiry Date (optional):"), 0, 4);
         grid.add(expiryPicker, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
@@ -1060,32 +1065,93 @@ public class OwnerController {
                 .getButtonTypes()
                 .addAll(ButtonType.OK, ButtonType.CANCEL);
 
+        // Add validation to prevent dialog from closing on invalid input
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.addEventFilter(ActionEvent.ACTION, e -> {
+            // Validate code
+            String code = codeField.getText().trim();
+            if (code.isEmpty()) {
+                AlertUtils.showValidationError("Code is required.");
+                e.consume();
+                return;
+            }
+
+            // Validate discount
+            String discountText = discountField.getText().trim();
+            if (discountText.isEmpty()) {
+                AlertUtils.showValidationError("Discount percentage is required.");
+                e.consume();
+                return;
+            }
+
+            double discount;
+            try {
+                discount = Double.parseDouble(discountText);
+            } catch (NumberFormatException ex) {
+                AlertUtils.showValidationError("Discount must be a valid number.");
+                e.consume();
+                return;
+            }
+
+            if (discount <= 0 || discount > 100) {
+                AlertUtils.showValidationError("Discount must be between 1 and 100.");
+                e.consume();
+                return;
+            }
+
+            // Validate minimum order value
+            String minOrderText = minOrderField.getText().trim();
+            if (!minOrderText.isEmpty()) {
+                try {
+                    double minOrder = Double.parseDouble(minOrderText);
+                    if (minOrder < 0) {
+                        AlertUtils.showValidationError("Minimum order value cannot be negative.");
+                        e.consume();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    AlertUtils.showValidationError("Minimum order value must be a valid number.");
+                    e.consume();
+                    return;
+                }
+            }
+
+            // Validate max usage
+            String maxUsageText = maxUsageField.getText().trim();
+            if (!maxUsageText.isEmpty()) {
+                try {
+                    int maxUsage = Integer.parseInt(maxUsageText);
+                    if (maxUsage < 0) {
+                        AlertUtils.showValidationError("Max usage cannot be negative. Use 0 for unlimited.");
+                        e.consume();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    AlertUtils.showValidationError("Max usage must be a valid whole number.");
+                    e.consume();
+                    return;
+                }
+            }
+
+            // Validate expiry date
+            if (expiryPicker.getValue() != null) {
+                if (expiryPicker.getValue().isBefore(java.time.LocalDate.now())) {
+                    AlertUtils.showValidationError("Expiry date cannot be in the past.");
+                    e.consume();
+                    return;
+                }
+            }
+        });
+
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 String code = codeField.getText().trim().toUpperCase();
-                if (code.isEmpty()) {
-                    AlertUtils.showValidationError("Code is required.");
-                    return null;
-                }
-
                 double discount = ValidationUtils.parseDouble(
                         discountField.getText());
-                if (discount <= 0 || discount > 100) {
-                    AlertUtils.showValidationError(
-                            "Discount must be between 1 and 100.");
-                    return null;
-                }
-
                 double minOrder = ValidationUtils.parseDouble(
                         minOrderField.getText());
-
                 int maxUsage = ValidationUtils.parseInt(
                         maxUsageField.getText());
-                if (maxUsage < 0) {
-                    AlertUtils.showValidationError(
-                            "Max usage cannot be negative. Use 0 for unlimited.");
-                    return null;
-                }
 
                 Coupon coupon = new Coupon();
                 coupon.setCode(code);
@@ -1099,14 +1165,25 @@ public class OwnerController {
         });
 
         Optional<Coupon> result = dialog.showAndWait();
+        System.out.println("DEBUG: Dialog closed, result present: " + result.isPresent());
         result.ifPresent(coupon -> {
-            if (couponDAO.create(coupon)) {
+            System.out.println("DEBUG: Attempting to create coupon: " + coupon.getCode());
+            System.out.println("DEBUG: Discount: " + coupon.getDiscountPercent());
+            System.out.println("DEBUG: Min Order: " + coupon.getMinOrderValue());
+            System.out.println("DEBUG: Max Usage: " + coupon.getMaxUsage());
+            System.out.println("DEBUG: Expiry Date: " + coupon.getExpiryDate());
+            System.out.println("DEBUG: Is Active: " + coupon.isActive());
+
+            boolean created = couponDAO.create(coupon);
+            System.out.println("DEBUG: Coupon created: " + created);
+
+            if (created) {
                 AlertUtils.showSuccess("Coupon created successfully!");
                 loadCoupons();
             } else {
                 AlertUtils.showError(
                         "Error",
-                        "Could not create coupon. Code may exist.");
+                        "Could not create coupon. Code may already exist.");
             }
         });
     }

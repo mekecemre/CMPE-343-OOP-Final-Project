@@ -20,13 +20,13 @@
             <Region HBox.hgrow="ALWAYS"/>
 
             <!-- Search Bar -->
-            <HBox spacing="10" alignment="CENTER">
+            <HBox spacing="8" alignment="CENTER" styleClass="search-container">
                 <TextField fx:id="searchField" promptText="Search products..."
-                           styleClass="search-field" prefWidth="350" onKeyPressed="#handleSearchKeyPressed"/>
-                <Button text="🔍" onAction="#handleSearch" styleClass="icon-button" prefWidth="40"/>
-                <Button text="Clear" onAction="#handleClearSearch" styleClass="secondary-button" prefWidth="70"/>
-                <Label text="Sort:" styleClass="field-label"/>
-                <ComboBox fx:id="sortComboBox" prefWidth="180" onAction="#handleSort" styleClass="combo-box"/>
+                           styleClass="search-field" prefWidth="300" onKeyPressed="#handleSearchKeyPressed"/>
+                <Button text="Search" onAction="#handleSearch" styleClass="search-button"/>
+                <Button text="Clear" onAction="#handleClearSearch" styleClass="clear-button"/>
+                <Label text="Sort:" styleClass="sort-label"/>
+                <ComboBox fx:id="sortComboBox" prefWidth="160" onAction="#handleSort" styleClass="sort-combo"/>
             </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>
