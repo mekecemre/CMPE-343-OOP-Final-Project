@@ -47,7 +47,7 @@
                         <Insets top="10" />
                     </VBox.margin>
                     <Label text="Username" styleClass="field-label"/>
-                    <TextField fx:id="usernameField" promptText="Enter your username" styleClass="text-field"/>
+                    <TextField fx:id="usernameField" promptText="Enter your username" styleClass="text-field" onKeyPressed="#handleKeyPressed"/>
                 </VBox>
 
                 <VBox spacing="6">
@@ -55,7 +55,7 @@
                         <Insets top="10" />
                     </VBox.margin>
                     <Label text="Password" styleClass="field-label"/>
-                    <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="text-field"/>
+                    <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="text-field" onKeyPressed="#handleKeyPressed"/>
                 </VBox>
 
                 <!-- Error Label -->

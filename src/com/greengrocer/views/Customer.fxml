@@ -22,12 +22,11 @@
             <!-- Search Bar -->
             <HBox spacing="10" alignment="CENTER">
                 <TextField fx:id="searchField" promptText="Search products..."
-                           styleClass="search-field" prefWidth="250"/>
-                <Button text="🔍" onAction="#handleSearch" styleClass="icon-button"/>
-                <Button text="Clear" onAction="#handleClearSearch" styleClass="secondary-button"/>
-                <Separator orientation="VERTICAL"/>
+                           styleClass="search-field" prefWidth="350" onKeyPressed="#handleSearchKeyPressed"/>
+                <Button text="🔍" onAction="#handleSearch" styleClass="icon-button" prefWidth="40"/>
+                <Button text="Clear" onAction="#handleClearSearch" styleClass="secondary-button" prefWidth="70"/>
                 <Label text="Sort:" styleClass="field-label"/>
-                <ComboBox fx:id="sortComboBox" prefWidth="150" onAction="#handleSort" styleClass="combo-box"/>
+                <ComboBox fx:id="sortComboBox" prefWidth="180" onAction="#handleSort" styleClass="combo-box"/>
             </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>

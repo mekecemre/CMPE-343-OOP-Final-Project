@@ -273,6 +273,28 @@ public class UserDAO {
     }
 
     /**
+     * Resets the completed orders count for a user (after using loyalty discount).
+     * 
+     * @param userId The user ID
+     * @return true if successful
+     */
+    public boolean resetCompletedOrders(int userId) {
+        String query = "UPDATE UserInfo SET completed_orders = 0 WHERE id = ?";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setInt(1, userId);
+
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Reset completed orders error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Gets the owner user.
      * 
      * @return Owner user or null

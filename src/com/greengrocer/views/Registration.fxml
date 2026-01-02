@@ -3,85 +3,131 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.greengrocer.controllers.RegistrationController"
             styleClass="main-container">
     
     <center>
-        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
-            <VBox alignment="CENTER" spacing="15" styleClass="registration-box">
-                <padding>
-                    <Insets bottom="30" left="60" right="60" top="30" />
-                </padding>
+        <StackPane alignment="CENTER" styleClass="main-container">
+            <VBox alignment="CENTER" spacing="0" styleClass="login-box" prefWidth="580" maxWidth="580" prefHeight="550" maxHeight="550" minHeight="390">
+            
+                <!-- Header Section -->
+                <VBox alignment="CENTER" spacing="2" styleClass="login-header">
+                    <padding>
+                        <Insets bottom="5" left="20" right="20" top="15" />
+                    </padding>
+                    <Label text="Group17 GreenGrocer" styleClass="app-title" alignment="CENTER"/>
+                    <Label text="Create your account to get started" styleClass="subtitle" alignment="CENTER">
+                        <VBox.margin>
+                            <Insets top="3" />
+                        </VBox.margin>
+                    </Label>
+                </VBox>
                 
-                <!-- Title -->
-                <Label text="🥬 Create Account" styleClass="app-title"/>
-                <Label text="Register as a new customer" styleClass="subtitle"/>
+                <!-- Styled Divider -->
+                <HBox alignment="CENTER">
+                    <Separator prefWidth="400" styleClass="login-divider"/>
+                    <VBox.margin>
+                        <Insets top="8" />
+                    </VBox.margin>
+                </HBox>
                 
-                <!-- Registration Form -->
-                <VBox spacing="12" styleClass="form-container" maxWidth="400">
+                <!-- Registration Form Section - Two Columns -->
+                <HBox spacing="25" alignment="TOP_CENTER" styleClass="form-section">
+                    <padding>
+                        <Insets bottom="15" left="25" right="25" top="15" />
+                    </padding>
                     
-                    <!-- Username -->
-                    <VBox spacing="5">
-                        <Label text="Username *" styleClass="field-label"/>
-                        <TextField fx:id="usernameField" promptText="Choose a username" styleClass="text-field"/>
+                    <!-- Left Column -->
+                    <VBox spacing="6" prefWidth="240">
+                        
+                        <!-- Username -->
+                        <VBox spacing="4">
+                            <Label text="Username *" styleClass="field-label"/>
+                            <TextField fx:id="usernameField" promptText="Min 3 characters" styleClass="text-field"/>
+                            <Label fx:id="usernameHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
+                        
+                        <!-- Password -->
+                        <VBox spacing="4">
+                            <Label text="Password *" styleClass="field-label"/>
+                            <PasswordField fx:id="passwordField" promptText="Strong password" styleClass="text-field"/>
+                            <!-- Password Requirements - Vertical with better wording -->
+                            <VBox spacing="1" style="-fx-padding: 2 0 0 3;">
+                                <Label fx:id="pwdLengthReq" text="✗ At least 6 characters" style="-fx-font-size: 10px; -fx-text-fill: #e74c3c;"/>
+                                <Label fx:id="pwdUpperReq" text="✗ One uppercase letter (A-Z)" style="-fx-font-size: 10px; -fx-text-fill: #e74c3c;"/>
+                                <Label fx:id="pwdLowerReq" text="✗ One lowercase letter (a-z)" style="-fx-font-size: 10px; -fx-text-fill: #e74c3c;"/>
+                            </VBox>
+                        </VBox>
+                        
+                        <!-- Confirm Password -->
+                        <VBox spacing="4">
+                            <Label text="Confirm Password *" styleClass="field-label"/>
+                            <PasswordField fx:id="confirmPasswordField" promptText="Confirm password" styleClass="text-field"/>
+                            <Label fx:id="confirmPwdHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
                     </VBox>
                     
-                    <!-- Password -->
-                    <VBox spacing="5">
-                        <Label text="Password *" styleClass="field-label"/>
-                        <PasswordField fx:id="passwordField" promptText="Choose a password" styleClass="text-field"/>
+                    <!-- Right Column -->
+                    <VBox spacing="6" prefWidth="240">
+                        
+                        <!-- Full Name -->
+                        <VBox spacing="4">
+                            <Label text="Full Name *" styleClass="field-label"/>
+                            <TextField fx:id="fullNameField" promptText="Letters only" styleClass="text-field"/>
+                            <Label fx:id="fullNameHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
+                        
+                        <!-- Email -->
+                        <VBox spacing="4">
+                            <Label text="Email *" styleClass="field-label"/>
+                            <TextField fx:id="emailField" promptText="user@example.com" styleClass="text-field"/>
+                            <Label fx:id="emailHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
+                        
+                        <!-- Phone -->
+                        <VBox spacing="4">
+                            <Label text="Phone *" styleClass="field-label"/>
+                            <TextField fx:id="phoneField" promptText="11 digits" styleClass="text-field"/>
+                            <Label fx:id="phoneHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
+                        
+                        <!-- Address -->
+                        <VBox spacing="4">
+                            <Label text="Address *" styleClass="field-label"/>
+                            <TextArea fx:id="addressField" promptText="Delivery address" 
+                                      styleClass="text-area" prefRowCount="2" prefWidth="240"/>
+                            <Label fx:id="addressHint" text="" style="-fx-font-size: 10px;" wrapText="true"/>
+                        </VBox>
                     </VBox>
+                </HBox>
+                
+                <!-- Error Label -->
+                <Label fx:id="errorLabel" styleClass="error-label" visible="false" wrapText="true">
+                    <VBox.margin>
+                        <Insets left="25" right="25" />
+                    </VBox.margin>
+                </Label>
+                
+                <!-- Buttons Section -->
+                <VBox spacing="8" styleClass="form-section">
+                    <padding>
+                        <Insets bottom="15" left="25" right="25" top="5" />
+                    </padding>
                     
-                    <!-- Confirm Password -->
-                    <VBox spacing="5">
-                        <Label text="Confirm Password *" styleClass="field-label"/>
-                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" styleClass="text-field"/>
-                    </VBox>
+                    <Button fx:id="registerButton" text="Create Account" onAction="#handleRegister" 
+                            styleClass="signin-button" maxWidth="Infinity"/>
                     
-                    <Separator/>
-                    
-                    <!-- Full Name -->
-                    <VBox spacing="5">
-                        <Label text="Full Name" styleClass="field-label"/>
-                        <TextField fx:id="fullNameField" promptText="Enter your full name" styleClass="text-field"/>
-                    </VBox>
-                    
-                    <!-- Address -->
-                    <VBox spacing="5">
-                        <Label text="Address" styleClass="field-label"/>
-                        <TextArea fx:id="addressField" promptText="Enter your delivery address" 
-                                  styleClass="text-area" prefRowCount="2"/>
-                    </VBox>
-                    
-                    <!-- Phone -->
-                    <VBox spacing="5">
-                        <Label text="Phone" styleClass="field-label"/>
-                        <TextField fx:id="phoneField" promptText="Enter your phone number" styleClass="text-field"/>
-                    </VBox>
-                    
-                    <!-- Email -->
-                    <VBox spacing="5">
-                        <Label text="Email" styleClass="field-label"/>
-                        <TextField fx:id="emailField" promptText="Enter your email address" styleClass="text-field"/>
-                    </VBox>
-                    
-                    <!-- Error Label -->
-                    <Label fx:id="errorLabel" styleClass="error-label" visible="false" wrapText="true"/>
-                    
-                    <!-- Buttons -->
-                    <HBox spacing="10" alignment="CENTER">
-                        <Button fx:id="registerButton" text="Register" onAction="#handleRegister" 
-                                styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-                        <Button fx:id="cancelButton" text="Back to Login" onAction="#handleCancel" 
-                                styleClass="secondary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <!-- Back to Login Link -->
+                    <HBox alignment="CENTER" spacing="5">
+                        <Label text="Already have an account?" styleClass="small-text"/>
+                        <Hyperlink fx:id="cancelButton" text="Sign in" onAction="#handleCancel" styleClass="signup-link"/>
                     </HBox>
-                    
-                    <Label text="* Required fields" styleClass="small-text"/>
                 </VBox>
             </VBox>
-        </ScrollPane>
+        </StackPane>
     </center>
     
 </BorderPane>

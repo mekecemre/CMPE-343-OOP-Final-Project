@@ -36,10 +36,11 @@
                 <TableView fx:id="cartTable" prefHeight="240" maxHeight="240" style="-fx-background-color: transparent;">
                     <columns>
                         <TableColumn fx:id="imageColumn" text="" prefWidth="55" minWidth="55" maxWidth="55" sortable="false" resizable="false"/>
-                        <TableColumn fx:id="productColumn" text="Product" prefWidth="160" minWidth="120"/>
-                        <TableColumn fx:id="quantityColumn" text="Qty (kg)" prefWidth="80" minWidth="70"/>
-                        <TableColumn fx:id="priceColumn" text="Price/kg" prefWidth="90" minWidth="80"/>
-                        <TableColumn fx:id="totalColumn" text="Total" prefWidth="90" minWidth="80"/>
+                        <TableColumn fx:id="productColumn" text="Product" prefWidth="140" minWidth="100"/>
+                        <TableColumn fx:id="quantityColumn" text="Qty (kg)" prefWidth="70" minWidth="60"/>
+                        <TableColumn fx:id="editColumn" text="Edit" prefWidth="110" minWidth="100" sortable="false" resizable="false"/>
+                        <TableColumn fx:id="priceColumn" text="Price/kg" prefWidth="80" minWidth="70"/>
+                        <TableColumn fx:id="totalColumn" text="Total" prefWidth="80" minWidth="70"/>
                         <TableColumn fx:id="actionColumn" text="" prefWidth="50" minWidth="50" maxWidth="50" sortable="false" resizable="false"/>
                     </columns>
                     <placeholder>

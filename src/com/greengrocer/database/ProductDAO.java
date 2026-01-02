@@ -171,7 +171,7 @@ public class ProductDAO {
      * Checks if a product with the given name exists, excluding a specific ID.
      * Used when updating a product to allow keeping the same name.
      * 
-     * @param name The product name to check
+     * @param name      The product name to check
      * @param excludeId The product ID to exclude from the check
      * @return true if another product with this name exists
      */
@@ -321,6 +321,30 @@ public class ProductDAO {
 
         } catch (SQLException e) {
             System.err.println("Update stock error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Restores stock of a product (used when order is cancelled).
+     * 
+     * @param productId The product ID
+     * @param quantity  The quantity to add back to stock
+     * @return true if successful
+     */
+    public boolean restoreStock(int productId, double quantity) {
+        String query = "UPDATE ProductInfo SET stock = stock + ? WHERE id = ?";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setDouble(1, quantity);
+            stmt.setInt(2, productId);
+
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Restore stock error: " + e.getMessage());
             return false;
         }
     }

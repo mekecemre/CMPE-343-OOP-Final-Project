@@ -43,9 +43,7 @@
                     </HBox>
 
                     <TableView fx:id="productsTable" VBox.vgrow="ALWAYS">
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
+
                         <columns>
                             <TableColumn fx:id="prodIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="prodNameColumn" text="Name" prefWidth="120"/>
@@ -75,9 +73,7 @@
                     </HBox>
 
                     <TableView fx:id="carriersTable" VBox.vgrow="ALWAYS">
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
+
                         <columns>
                             <TableColumn fx:id="carrIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="carrUsernameColumn" text="Username" prefWidth="100"/>
@@ -101,14 +97,12 @@
                         <Label text="Filter:" styleClass="field-label"/>
                         <ComboBox fx:id="orderFilterCombo" onAction="#handleFilterOrders"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="totalSalesLabel" text="Total Sales: $0.00" styleClass="sales-label"/>
+                        <Label fx:id="totalSalesLabel" text="Total Sales: 0.00" styleClass="sales-label"/>
                         <Button text="Refresh" onAction="#handleRefreshOrders" styleClass="secondary-button"/>
                     </HBox>
 
                     <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
+
                         <columns>
                             <TableColumn fx:id="ordIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="ordCustomerColumn" text="Customer" prefWidth="100"/>
@@ -163,9 +157,7 @@
                     </HBox>
 
                     <TableView fx:id="couponsTable" VBox.vgrow="SOMETIMES" prefHeight="200">
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
+
                         <columns>
                             <TableColumn fx:id="coupIdColumn" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="coupCodeColumn" text="Code" prefWidth="120"/>
@@ -201,9 +193,7 @@
 
                     <Label text="Carrier Ratings" styleClass="section-title"/>
                     <TableView fx:id="ratingsTable" VBox.vgrow="ALWAYS">
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
+
                         <columns>
                             <TableColumn fx:id="rateCarrierColumn" text="Carrier" prefWidth="120"/>
                             <TableColumn fx:id="rateCustomerColumn" text="Customer" prefWidth="120"/>
@@ -234,13 +224,13 @@
                         </padding>
 
                         <Label text="Total Revenue:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                        <Label fx:id="totalRevenueLabel" text="$0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label fx:id="totalRevenueLabel" text="0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
                         <Label text="Total Orders:" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
                         <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-value" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
 
                         <Label text="Average Order Value:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                        <Label fx:id="avgOrderValueLabel" text="$0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label fx:id="avgOrderValueLabel" text="0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                         <Label text="Pending Orders:" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
                         <Label fx:id="pendingOrdersLabel" text="0" styleClass="stat-value" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
@@ -260,7 +250,7 @@
                                     <CategoryAxis label="Product"/>
                                 </xAxis>
                                 <yAxis>
-                                    <NumberAxis label="Sales ($)"/>
+                                    <NumberAxis label="Sales"/>
                                 </yAxis>
                             </BarChart>
                         </VBox>

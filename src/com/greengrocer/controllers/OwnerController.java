@@ -227,14 +227,14 @@ public class OwnerController {
 
     private User currentUser;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(
-        "yyyy-MM-dd HH:mm"
-    );
+            "yyyy-MM-dd HH:mm");
 
     /**
      * Default constructor for OwnerController.
      * Called by JavaFX when loading the FXML file.
      */
-    public OwnerController() {}
+    public OwnerController() {
+    }
 
     /**
      * Initializes the controller.
@@ -261,6 +261,14 @@ public class OwnerController {
         setupCouponsTable();
         setupRatingsTable();
 
+        // Set column resize policy for all tables (done programmatically for JavaFX 25
+        // compatibility)
+        productsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        carriersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        couponsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        ratingsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+
         // Load initial data
         loadProducts();
         loadCarriers();
@@ -270,68 +278,90 @@ public class OwnerController {
         loadLoyaltySettings();
         loadRatings();
         loadCharts();
+
+        // Check for delivery notifications
+        checkDeliveryNotifications();
+    }
+
+    /**
+     * Checks for unnotified delivered orders and shows a popup.
+     */
+    private void checkDeliveryNotifications() {
+        List<Order> unnotified = orderDAO.getUnnotifiedDeliveredOrdersForOwner();
+
+        if (!unnotified.isEmpty()) {
+            StringBuilder message = new StringBuilder("The following orders have been delivered:\n\n");
+            List<Integer> orderIds = new java.util.ArrayList<>();
+
+            for (Order order : unnotified) {
+                String carrierName = order.getCarrierName() != null ? order.getCarrierName() : "Unknown Carrier";
+                String customerName = order.getCustomerName() != null ? order.getCustomerName() : "Unknown Customer";
+
+                message.append("• Order #").append(order.getId())
+                        .append(": Carrier '").append(carrierName)
+                        .append("' delivered to '").append(customerName).append("'\n");
+                orderIds.add(order.getId());
+            }
+
+            // Mark as notified immediately
+            orderDAO.markOrdersAsNotified(orderIds, "OWNER");
+
+            // Show popup
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Delivery Notification");
+            alert.setHeaderText("New Deliveries Completed");
+            alert.setContentText(message.toString());
+            alert.show();
+        }
     }
 
     // ======================== PRODUCTS TAB ========================
 
     private void setupProductsTable() {
-        prodIdColumn.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getId()).asObject()
-        );
-        prodNameColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getName())
-        );
-        prodTypeColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getType())
-        );
-        prodPriceColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getPrice()).asObject()
-        );
-        prodStockColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getStock()).asObject()
-        );
-        prodThresholdColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getThreshold()).asObject()
-        );
+        prodIdColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        prodNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        prodTypeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getType()));
+        prodPriceColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPrice()).asObject());
+        prodStockColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getStock()).asObject());
+        prodThresholdColumn
+                .setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getThreshold()).asObject());
         prodStatusColumn.setCellValueFactory(data -> {
             Product p = data.getValue();
             String status = p.getStock() <= 0
-                ? "Out of Stock"
-                : (p.isLowStock() ? "Low Stock (2x Price)" : "Normal");
+                    ? "Out of Stock"
+                    : (p.isLowStock() ? "Low Stock (2x Price)" : "Normal");
             return new SimpleStringProperty(status);
         });
 
         // Image column with thumbnail
-        prodImageColumn.setCellFactory(col ->
-            new TableCell<Product, Void>() {
-                private final ImageView imageView = new ImageView();
+        prodImageColumn.setCellFactory(col -> new TableCell<Product, Void>() {
+            private final ImageView imageView = new ImageView();
 
-                {
-                    imageView.setFitWidth(40);
-                    imageView.setFitHeight(40);
-                    imageView.setPreserveRatio(true);
-                }
+            {
+                imageView.setFitWidth(40);
+                imageView.setFitHeight(40);
+                imageView.setPreserveRatio(true);
+            }
 
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        Product product = getTableView()
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Product product = getTableView()
                             .getItems()
                             .get(getIndex());
-                        Image image = loadProductImage(product);
-                        if (image != null) {
-                            imageView.setImage(image);
-                            setGraphic(imageView);
-                        } else {
-                            setGraphic(new Label("No img"));
-                        }
+                    Image image = loadProductImage(product);
+                    if (image != null) {
+                        imageView.setImage(image);
+                        setGraphic(imageView);
+                    } else {
+                        setGraphic(new Label("No img"));
                     }
                 }
             }
-        );
+        });
 
         // Set row height for images
         productsTable.setFixedCellSize(45);
@@ -353,10 +383,8 @@ public class OwnerController {
         for (String ext : extensions) {
             try {
                 Image image = new Image(
-                    getClass().getResourceAsStream(
-                        "/com/greengrocer/images/" + baseName + ext
-                    )
-                );
+                        getClass().getResourceAsStream(
+                                "/com/greengrocer/images/" + baseName + ext));
                 if (image != null && !image.isError()) {
                     return image;
                 }
@@ -381,11 +409,10 @@ public class OwnerController {
             // Check for duplicate name
             if (productDAO.existsByName(product.getName())) {
                 AlertUtils.showError(
-                    "Duplicate Name",
-                    "A product with the name '" +
-                        product.getName() +
-                        "' already exists."
-                );
+                        "Duplicate Name",
+                        "A product with the name '" +
+                                product.getName() +
+                                "' already exists.");
                 return;
             }
             if (productDAO.add(product)) {
@@ -402,9 +429,8 @@ public class OwnerController {
         Product selected = productsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a product to edit."
-            );
+                    "No Selection",
+                    "Please select a product to edit.");
             return;
         }
 
@@ -412,24 +438,20 @@ public class OwnerController {
         Optional<Product> result = dialog.showAndWait();
         result.ifPresent(product -> {
             // Check for duplicate name (excluding current product)
-            if (
-                productDAO.existsByNameExcluding(
+            if (productDAO.existsByNameExcluding(
                     product.getName(),
-                    product.getId()
-                )
-            ) {
+                    product.getId())) {
                 AlertUtils.showError(
-                    "Duplicate Name",
-                    "Another product with the name '" +
-                        product.getName() +
-                        "' already exists."
-                );
+                        "Duplicate Name",
+                        "Another product with the name '" +
+                                product.getName() +
+                                "' already exists.");
                 return;
             }
             // Use updateWithImage if image is set
             boolean success = product.getImage() != null
-                ? productDAO.updateWithImage(product)
-                : productDAO.update(product);
+                    ? productDAO.updateWithImage(product)
+                    : productDAO.update(product);
             if (success) {
                 AlertUtils.showSuccess("Product updated successfully!");
                 loadProducts();
@@ -444,26 +466,21 @@ public class OwnerController {
         Product selected = productsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a product to delete."
-            );
+                    "No Selection",
+                    "Please select a product to delete.");
             return;
         }
 
-        if (
-            AlertUtils.showConfirmation(
+        if (AlertUtils.showConfirmation(
                 "Delete Product",
-                "Are you sure you want to delete " + selected.getName() + "?"
-            )
-        ) {
+                "Are you sure you want to delete " + selected.getName() + "?")) {
             if (productDAO.delete(selected.getId())) {
                 AlertUtils.showSuccess("Product deleted successfully!");
                 loadProducts();
             } else {
                 AlertUtils.showError(
-                    "Error",
-                    "Could not delete product. It may be in use."
-                );
+                        "Error",
+                        "Could not delete product. It may be in use.");
             }
         }
     }
@@ -483,20 +500,16 @@ public class OwnerController {
         grid.setPadding(new Insets(20));
 
         TextField nameField = new TextField(
-            existing != null ? existing.getName() : ""
-        );
+                existing != null ? existing.getName() : "");
         ComboBox<String> typeCombo = new ComboBox<>();
         typeCombo.getItems().addAll("VEGETABLE", "FRUIT");
         typeCombo.setValue(existing != null ? existing.getType() : "VEGETABLE");
         TextField priceField = new TextField(
-            existing != null ? String.valueOf(existing.getPrice()) : ""
-        );
+                existing != null ? String.valueOf(existing.getPrice()) : "");
         TextField stockField = new TextField(
-            existing != null ? String.valueOf(existing.getStock()) : ""
-        );
+                existing != null ? String.valueOf(existing.getStock()) : "");
         TextField thresholdField = new TextField(
-            existing != null ? String.valueOf(existing.getThreshold()) : "5.0"
-        );
+                existing != null ? String.valueOf(existing.getThreshold()) : "5.0");
 
         // Image upload section
         ImageView previewImage = new ImageView();
@@ -506,7 +519,7 @@ public class OwnerController {
 
         // Array to hold selected image bytes
         final byte[][] selectedImageBytes = {
-            existing != null ? existing.getImage() : null,
+                existing != null ? existing.getImage() : null,
         };
 
         // Load existing image preview
@@ -519,37 +532,32 @@ public class OwnerController {
 
         Button uploadBtn = new Button("Choose Image...");
         Label imageLabel = new Label(
-            selectedImageBytes[0] != null ? "Image set" : "No image"
-        );
+                selectedImageBytes[0] != null ? "Image set" : "No image");
 
         uploadBtn.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Product Image");
             fileChooser
-                .getExtensionFilters()
-                .addAll(
-                    new FileChooser.ExtensionFilter(
-                        "Images",
-                        "*.png",
-                        "*.jpg",
-                        "*.jpeg",
-                        "*.gif"
-                    )
-                );
+                    .getExtensionFilters()
+                    .addAll(
+                            new FileChooser.ExtensionFilter(
+                                    "Images",
+                                    "*.png",
+                                    "*.jpg",
+                                    "*.jpeg",
+                                    "*.gif"));
             File file = fileChooser.showOpenDialog(dialog.getOwner());
             if (file != null) {
                 try {
                     selectedImageBytes[0] = Files.readAllBytes(file.toPath());
                     Image img = new Image(
-                        new ByteArrayInputStream(selectedImageBytes[0])
-                    );
+                            new ByteArrayInputStream(selectedImageBytes[0]));
                     previewImage.setImage(img);
                     imageLabel.setText(file.getName());
                 } catch (Exception ex) {
                     AlertUtils.showError(
-                        "Error",
-                        "Could not load image: " + ex.getMessage()
-                    );
+                            "Error",
+                            "Could not load image: " + ex.getMessage());
                 }
             }
         });
@@ -572,9 +580,9 @@ public class OwnerController {
 
         dialog.getDialogPane().setContent(grid);
         dialog
-            .getDialogPane()
-            .getButtonTypes()
-            .addAll(ButtonType.OK, ButtonType.CANCEL);
+                .getDialogPane()
+                .getButtonTypes()
+                .addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
@@ -585,31 +593,25 @@ public class OwnerController {
                 }
 
                 double price = ValidationUtils.parseDouble(
-                    priceField.getText()
-                );
+                        priceField.getText());
                 double stock = ValidationUtils.parseDouble(
-                    stockField.getText()
-                );
+                        stockField.getText());
                 double threshold = ValidationUtils.parseDouble(
-                    thresholdField.getText()
-                );
+                        thresholdField.getText());
 
                 if (price <= 0) {
                     AlertUtils.showValidationError(
-                        "Price must be a positive number."
-                    );
+                            "Price must be a positive number.");
                     return null;
                 }
                 if (stock <= 0) {
                     AlertUtils.showValidationError(
-                        "Stock must be a positive number."
-                    );
+                            "Stock must be a positive number.");
                     return null;
                 }
                 if (threshold <= 0) {
                     AlertUtils.showValidationError(
-                        "Threshold must be a positive number."
-                    );
+                            "Threshold must be a positive number.");
                     return null;
                 }
 
@@ -631,27 +633,17 @@ public class OwnerController {
     // ======================== CARRIERS TAB ========================
 
     private void setupCarriersTable() {
-        carrIdColumn.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getId()).asObject()
-        );
-        carrUsernameColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getUsername())
-        );
-        carrNameColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getFullName())
-        );
-        carrPhoneColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getPhone())
-        );
-        carrEmailColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getEmail())
-        );
+        carrIdColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        carrUsernameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
+        carrNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFullName()));
+        carrPhoneColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPhone()));
+        carrEmailColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEmail()));
         carrRatingColumn.setCellValueFactory(data -> {
             double rating = ratingDAO.getAverageRating(data.getValue().getId());
             int count = ratingDAO.getRatingCount(data.getValue().getId());
             String text = count > 0
-                ? String.format("%.1f/5 (%d)", rating, count)
-                : "No ratings";
+                    ? String.format("%.1f/5 (%d)", rating, count)
+                    : "No ratings";
             return new SimpleStringProperty(text);
         });
     }
@@ -676,45 +668,96 @@ public class OwnerController {
         TextField fullNameField = new TextField();
         TextField phoneField = new TextField();
         TextField emailField = new TextField();
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 11px;");
+        errorLabel.setWrapText(true);
+        errorLabel.setMaxWidth(250);
 
-        grid.add(new Label("Username:"), 0, 0);
+        grid.add(new Label("Username *:"), 0, 0);
         grid.add(usernameField, 1, 0);
-        grid.add(new Label("Password:"), 0, 1);
+        grid.add(new Label("Password *:"), 0, 1);
         grid.add(passwordField, 1, 1);
-        grid.add(new Label("Full Name:"), 0, 2);
+        grid.add(new Label("Full Name *:"), 0, 2);
         grid.add(fullNameField, 1, 2);
-        grid.add(new Label("Phone:"), 0, 3);
+        grid.add(new Label("Phone *:"), 0, 3);
         grid.add(phoneField, 1, 3);
-        grid.add(new Label("Email:"), 0, 4);
+        grid.add(new Label("Email *:"), 0, 4);
         grid.add(emailField, 1, 4);
+        grid.add(new Label("* Required fields"), 0, 5, 2, 1);
+        grid.add(errorLabel, 0, 6, 2, 1);
 
         dialog.getDialogPane().setContent(grid);
-        dialog
-            .getDialogPane()
-            .getButtonTypes()
-            .addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Get the OK button and add event filter to validate before closing
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.addEventFilter(ActionEvent.ACTION, e -> {
+            String username = usernameField.getText().trim();
+            String password = passwordField.getText();
+            String fullName = fullNameField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String email = emailField.getText().trim();
+
+            // Validate all required fields
+            if (username.isEmpty()) {
+                errorLabel.setText("Username is required.");
+                e.consume(); // Prevent dialog from closing
+                return;
+            }
+
+            if (fullName.isEmpty()) {
+                errorLabel.setText("Full name is required.");
+                e.consume();
+                return;
+            }
+
+            // Validate full name - letters and spaces only
+            if (!fullName.matches("^[a-zA-ZÀ-ÿ\\s]+$")) {
+                errorLabel.setText("Full name can only contain letters and spaces.");
+                e.consume();
+                return;
+            }
+
+            if (phone.isEmpty()) {
+                errorLabel.setText("Phone number is required.");
+                e.consume();
+                return;
+            }
+
+            if (email.isEmpty()) {
+                errorLabel.setText("Email is required.");
+                e.consume();
+                return;
+            }
+
+            // Validate password strength
+            String passwordError = ValidationUtils.getPasswordError(password);
+            if (passwordError != null) {
+                errorLabel.setText(passwordError);
+                e.consume();
+                return;
+            }
+
+            // Validate email format
+            if (!ValidationUtils.isValidEmail(email)) {
+                errorLabel.setText("Invalid email format (e.g., user@example.com).");
+                e.consume();
+                return;
+            }
+
+            // Validate phone format (exactly 11 digits)
+            if (!ValidationUtils.isValidPhone(phone)) {
+                errorLabel.setText("Phone must be exactly 11 digits.");
+                e.consume();
+                return;
+            }
+
+            // All validation passed, clear error
+            errorLabel.setText("");
+        });
 
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
-                if (
-                    usernameField.getText().trim().isEmpty() ||
-                    passwordField.getText().isEmpty()
-                ) {
-                    AlertUtils.showValidationError(
-                        "Username and password are required."
-                    );
-                    return null;
-                }
-
-                // Validate password strength
-                String passwordError = ValidationUtils.getPasswordError(
-                    passwordField.getText()
-                );
-                if (passwordError != null) {
-                    AlertUtils.showValidationError(passwordError);
-                    return null;
-                }
-
                 User carrier = new User();
                 carrier.setUsername(usernameField.getText().trim());
                 carrier.setPassword(passwordField.getText());
@@ -733,9 +776,8 @@ public class OwnerController {
                 loadCarriers();
             } else {
                 AlertUtils.showError(
-                    "Error",
-                    "Could not add carrier. Username may exist."
-                );
+                        "Error",
+                        "Could not add carrier. Username may exist.");
             }
         });
     }
@@ -745,18 +787,14 @@ public class OwnerController {
         User selected = carriersTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a carrier to fire."
-            );
+                    "No Selection",
+                    "Please select a carrier to fire.");
             return;
         }
 
-        if (
-            AlertUtils.showConfirmation(
+        if (AlertUtils.showConfirmation(
                 "Fire Carrier",
-                "Are you sure you want to fire " + selected.getUsername() + "?"
-            )
-        ) {
+                "Are you sure you want to fire " + selected.getUsername() + "?")) {
             if (userDAO.deleteCarrier(selected.getId())) {
                 AlertUtils.showSuccess("Carrier removed successfully!");
                 loadCarriers();
@@ -774,32 +812,20 @@ public class OwnerController {
     // ======================== ORDERS TAB ========================
 
     private void setupOrdersTable() {
-        ordIdColumn.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getId()).asObject()
-        );
-        ordCustomerColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getCustomerName())
-        );
-        ordDateColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(
+        ordIdColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        ordCustomerColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCustomerName()));
+        ordDateColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getOrderTime() != null
-                    ? data.getValue().getOrderTime().format(dateFormatter)
-                    : ""
-            )
-        );
-        ordDeliveryColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(
+                        ? data.getValue().getOrderTime().format(dateFormatter)
+                        : ""));
+        ordDeliveryColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getRequestedDelivery() != null
-                    ? data
-                          .getValue()
-                          .getRequestedDelivery()
-                          .format(dateFormatter)
-                    : ""
-            )
-        );
-        ordStatusColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getStatus())
-        );
+                        ? data
+                                .getValue()
+                                .getRequestedDelivery()
+                                .format(dateFormatter)
+                        : ""));
+        ordStatusColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatus()));
         ordStatusTimeColumn.setCellValueFactory(data -> {
             Order order = data.getValue();
             String timeInfo = "-";
@@ -814,21 +840,16 @@ public class OwnerController {
             }
             return new SimpleStringProperty(timeInfo);
         });
-        ordCarrierColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(
+        ordCarrierColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getCarrierName() != null
-                    ? data.getValue().getCarrierName()
-                    : "-"
-            )
-        );
-        ordTotalColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getTotalCost()).asObject()
-        );
+                        ? data.getValue().getCarrierName()
+                        : "-"));
+        ordTotalColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTotalCost()).asObject());
 
         // Order filter combo
         orderFilterCombo
-            .getItems()
-            .addAll("ALL", "PENDING", "SELECTED", "DELIVERED", "CANCELLED");
+                .getItems()
+                .addAll("ALL", "PENDING", "SELECTED", "DELIVERED", "CANCELLED");
         orderFilterCombo.setValue("ALL");
     }
 
@@ -847,8 +868,7 @@ public class OwnerController {
         // Update total sales
         double totalSales = orderDAO.getTotalSales();
         totalSalesLabel.setText(
-            String.format("Total Sales: $%.2f", totalSales)
-        );
+                String.format("Total Sales: $%.2f", totalSales));
     }
 
     @FXML
@@ -864,16 +884,14 @@ public class OwnerController {
     // ======================== MESSAGES TAB ========================
 
     private void setupMessagesTab() {
-        messagesList.setCellFactory(lv ->
-            new ListCell<Message>() {
-                @Override
-                protected void updateItem(Message msg, boolean empty) {
-                    super.updateItem(msg, empty);
-                    if (empty || msg == null) {
-                        setText(null);
-                    } else {
-                        String text =
-                            (msg.isRead() ? "" : "🔴 ") +
+        messagesList.setCellFactory(lv -> new ListCell<Message>() {
+            @Override
+            protected void updateItem(Message msg, boolean empty) {
+                super.updateItem(msg, empty);
+                if (empty || msg == null) {
+                    setText(null);
+                } else {
+                    String text = (msg.isRead() ? "" : "🔴 ") +
                             "From: " +
                             msg.getSenderName() +
                             "\n" +
@@ -881,46 +899,44 @@ public class OwnerController {
                             msg.getSubject() +
                             "\n" +
                             msg.getSentAt().format(dateFormatter);
-                        if (msg.hasReply()) {
-                            text += " ✓ Replied";
-                        }
-                        setText(text);
+                    if (msg.hasReply()) {
+                        text += " ✓ Replied";
                     }
+                    setText(text);
                 }
             }
-        );
+        });
 
         messagesList
-            .getSelectionModel()
-            .selectedItemProperty()
-            .addListener((obs, old, selected) -> {
-                if (selected != null) {
-                    messageContentArea.setText(
-                        "From: " +
-                            selected.getSenderName() +
-                            "\n" +
-                            "Subject: " +
-                            selected.getSubject() +
-                            "\n" +
-                            "Date: " +
-                            selected.getSentAt().format(dateFormatter) +
-                            "\n\n" +
-                            selected.getContent()
-                    );
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener((obs, old, selected) -> {
+                    if (selected != null) {
+                        messageContentArea.setText(
+                                "From: " +
+                                        selected.getSenderName() +
+                                        "\n" +
+                                        "Subject: " +
+                                        selected.getSubject() +
+                                        "\n" +
+                                        "Date: " +
+                                        selected.getSentAt().format(dateFormatter) +
+                                        "\n\n" +
+                                        selected.getContent());
 
-                    if (selected.hasReply()) {
-                        replyArea.setText(selected.getReply());
-                    } else {
-                        replyArea.clear();
-                    }
+                        if (selected.hasReply()) {
+                            replyArea.setText(selected.getReply());
+                        } else {
+                            replyArea.clear();
+                        }
 
-                    // Mark as read
-                    if (!selected.isRead()) {
-                        messageDAO.markAsRead(selected.getId());
-                        loadMessages();
+                        // Mark as read
+                        if (!selected.isRead()) {
+                            messageDAO.markAsRead(selected.getId());
+                            loadMessages();
+                        }
                     }
-                }
-            });
+                });
     }
 
     private void loadMessages() {
@@ -933,9 +949,8 @@ public class OwnerController {
         Message selected = messagesList.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a message to reply to."
-            );
+                    "No Selection",
+                    "Please select a message to reply to.");
             return;
         }
 
@@ -956,32 +971,18 @@ public class OwnerController {
     // ======================== COUPONS TAB ========================
 
     private void setupCouponsTable() {
-        coupIdColumn.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getId()).asObject()
-        );
-        coupCodeColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getCode())
-        );
-        coupDiscountColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                data.getValue().getDiscountPercent()
-            ).asObject()
-        );
-        coupMinColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                data.getValue().getMinOrderValue()
-            ).asObject()
-        );
-        coupExpiryColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(
+        coupIdColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        coupCodeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
+        coupDiscountColumn.setCellValueFactory(data -> new SimpleDoubleProperty(
+                data.getValue().getDiscountPercent()).asObject());
+        coupMinColumn.setCellValueFactory(data -> new SimpleDoubleProperty(
+                data.getValue().getMinOrderValue()).asObject());
+        coupExpiryColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getExpiryDate() != null
-                    ? data.getValue().getExpiryDate().toString()
-                    : "No expiry"
-            )
-        );
-        coupActiveColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().isActive() ? "Yes" : "No")
-        );
+                        ? data.getValue().getExpiryDate().toString()
+                        : "No expiry"));
+        coupActiveColumn
+                .setCellValueFactory(data -> new SimpleStringProperty(data.getValue().isActive() ? "Yes" : "No"));
 
         // Usage column shows usage statistics
         coupUsageColumn.setCellValueFactory(data -> {
@@ -990,8 +991,7 @@ public class OwnerController {
             if (coupon.getMaxUsage() == 0) {
                 usageText = coupon.getUsageCount() + " / Unlimited";
             } else {
-                usageText =
-                    coupon.getUsageCount() + " / " + coupon.getMaxUsage();
+                usageText = coupon.getUsageCount() + " / " + coupon.getMaxUsage();
             }
             return new SimpleStringProperty(usageText);
         });
@@ -1002,10 +1002,8 @@ public class OwnerController {
             String status;
             if (!coupon.isActive()) {
                 status = "Inactive";
-            } else if (
-                coupon.getExpiryDate() != null &&
-                coupon.getExpiryDate().isBefore(java.time.LocalDate.now())
-            ) {
+            } else if (coupon.getExpiryDate() != null &&
+                    coupon.getExpiryDate().isBefore(java.time.LocalDate.now())) {
                 status = "Expired";
             } else if (coupon.isUsageLimitReached()) {
                 status = "Usage Limit Reached";
@@ -1024,11 +1022,9 @@ public class OwnerController {
     private void loadLoyaltySettings() {
         LoyaltySettings settings = loyaltySettingsDAO.getSettings();
         loyaltyOrdersField.setText(
-            String.valueOf(settings.getMinOrdersForDiscount())
-        );
+                String.valueOf(settings.getMinOrdersForDiscount()));
         loyaltyDiscountField.setText(
-            String.valueOf(settings.getDiscountPercent())
-        );
+                String.valueOf(settings.getDiscountPercent()));
     }
 
     @FXML
@@ -1060,9 +1056,9 @@ public class OwnerController {
 
         dialog.getDialogPane().setContent(grid);
         dialog
-            .getDialogPane()
-            .getButtonTypes()
-            .addAll(ButtonType.OK, ButtonType.CANCEL);
+                .getDialogPane()
+                .getButtonTypes()
+                .addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
@@ -1073,26 +1069,21 @@ public class OwnerController {
                 }
 
                 double discount = ValidationUtils.parseDouble(
-                    discountField.getText()
-                );
+                        discountField.getText());
                 if (discount <= 0 || discount > 100) {
                     AlertUtils.showValidationError(
-                        "Discount must be between 1 and 100."
-                    );
+                            "Discount must be between 1 and 100.");
                     return null;
                 }
 
                 double minOrder = ValidationUtils.parseDouble(
-                    minOrderField.getText()
-                );
+                        minOrderField.getText());
 
                 int maxUsage = ValidationUtils.parseInt(
-                    maxUsageField.getText()
-                );
+                        maxUsageField.getText());
                 if (maxUsage < 0) {
                     AlertUtils.showValidationError(
-                        "Max usage cannot be negative. Use 0 for unlimited."
-                    );
+                            "Max usage cannot be negative. Use 0 for unlimited.");
                     return null;
                 }
 
@@ -1114,9 +1105,8 @@ public class OwnerController {
                 loadCoupons();
             } else {
                 AlertUtils.showError(
-                    "Error",
-                    "Could not create coupon. Code may exist."
-                );
+                        "Error",
+                        "Could not create coupon. Code may exist.");
             }
         });
     }
@@ -1126,9 +1116,8 @@ public class OwnerController {
         Coupon selected = couponsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a coupon to deactivate."
-            );
+                    "No Selection",
+                    "Please select a coupon to deactivate.");
             return;
         }
 
@@ -1143,17 +1132,15 @@ public class OwnerController {
         Coupon selected = couponsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Selection",
-                "Please select a coupon to assign."
-            );
+                    "No Selection",
+                    "Please select a coupon to assign.");
             return;
         }
 
         List<User> customers = userDAO.getAllCustomers();
         ChoiceDialog<User> dialog = new ChoiceDialog<>(
-            customers.isEmpty() ? null : customers.get(0),
-            customers
-        );
+                customers.isEmpty() ? null : customers.get(0),
+                customers);
         dialog.setTitle("Assign Coupon");
         dialog.setHeaderText("Select a customer to assign the coupon");
 
@@ -1161,8 +1148,7 @@ public class OwnerController {
         result.ifPresent(customer -> {
             if (couponDAO.assignToUser(customer.getId(), selected.getId())) {
                 AlertUtils.showSuccess(
-                    "Coupon assigned to " + customer.getUsername() + "!"
-                );
+                        "Coupon assigned to " + customer.getUsername() + "!");
             } else {
                 AlertUtils.showError("Error", "Could not assign coupon.");
             }
@@ -1178,8 +1164,7 @@ public class OwnerController {
     private void handleSaveLoyalty(ActionEvent event) {
         int orders = ValidationUtils.parseInt(loyaltyOrdersField.getText());
         double discount = ValidationUtils.parseDouble(
-            loyaltyDiscountField.getText()
-        );
+                loyaltyDiscountField.getText());
 
         if (orders <= 0) {
             AlertUtils.showValidationError("Orders required must be positive.");
@@ -1187,8 +1172,7 @@ public class OwnerController {
         }
         if (discount <= 0 || discount > 100) {
             AlertUtils.showValidationError(
-                "Discount must be between 1 and 100."
-            );
+                    "Discount must be between 1 and 100.");
             return;
         }
 
@@ -1206,28 +1190,15 @@ public class OwnerController {
     // ======================== RATINGS TAB ========================
 
     private void setupRatingsTable() {
-        rateCarrierColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getCarrierName())
-        );
-        rateCustomerColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getCustomerName())
-        );
-        rateOrderColumn.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getOrderId()).asObject()
-        );
-        rateStarsColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getStarsDisplay())
-        );
-        rateCommentColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getComment())
-        );
-        rateDateColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(
+        rateCarrierColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCarrierName()));
+        rateCustomerColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCustomerName()));
+        rateOrderColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getOrderId()).asObject());
+        rateStarsColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStarsDisplay()));
+        rateCommentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getComment()));
+        rateDateColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getCreatedAt() != null
-                    ? data.getValue().getCreatedAt().format(dateFormatter)
-                    : ""
-            )
-        );
+                        ? data.getValue().getCreatedAt().format(dateFormatter)
+                        : ""));
     }
 
     private void loadRatings() {
@@ -1254,8 +1225,8 @@ public class OwnerController {
             }
         }
         double avgOrderValue = deliveredCount > 0
-            ? totalRevenue / deliveredCount
-            : 0;
+                ? totalRevenue / deliveredCount
+                : 0;
         avgOrderValueLabel.setText(String.format("$%.2f", avgOrderValue));
 
         // Pending Orders
@@ -1275,13 +1246,11 @@ public class OwnerController {
                 double quantity = rs.getDouble("total_quantity");
                 double sales = rs.getDouble("total_sales");
                 bestSellingLabel.setText(
-                    String.format(
-                        "%s (%.1f kg sold, $%.2f revenue)",
-                        bestProduct,
-                        quantity,
-                        sales
-                    )
-                );
+                        String.format(
+                                "%s (%.1f kg sold, $%.2f revenue)",
+                                bestProduct,
+                                quantity,
+                                sales));
             } else {
                 bestSellingLabel.setText("No sales data yet");
             }
@@ -1319,18 +1288,19 @@ public class OwnerController {
 
         List<Product> products = productDAO.findAllIncludingOutOfStock();
         int vegCount = 0,
-            fruitCount = 0;
+                fruitCount = 0;
         for (Product p : products) {
-            if (p.isVegetable()) vegCount++;
-            else fruitCount++;
+            if (p.isVegetable())
+                vegCount++;
+            else
+                fruitCount++;
         }
 
         productDistributionChart
-            .getData()
-            .addAll(
-                new PieChart.Data("Vegetables (" + vegCount + ")", vegCount),
-                new PieChart.Data("Fruits (" + fruitCount + ")", fruitCount)
-            );
+                .getData()
+                .addAll(
+                        new PieChart.Data("Vegetables (" + vegCount + ")", vegCount),
+                        new PieChart.Data("Fruits (" + fruitCount + ")", fruitCount));
     }
 
     @FXML
@@ -1346,9 +1316,8 @@ public class OwnerController {
         SessionManager.getInstance().logout();
         Stage stage = (Stage) usernameLabel.getScene().getWindow();
         SceneNavigator.loadScene(
-            stage,
-            "Login.fxml",
-            "Group17 GreenGrocer - Login"
-        );
+                stage,
+                "Login.fxml",
+                "Group17 GreenGrocer - Login");
     }
 }

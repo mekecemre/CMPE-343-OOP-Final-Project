@@ -48,6 +48,9 @@ public class ShoppingCartController {
     private TableColumn<CartItem, Double> totalColumn;
 
     @FXML
+    private TableColumn<CartItem, Void> editColumn;
+
+    @FXML
     private TableColumn<CartItem, Void> actionColumn;
 
     @FXML
@@ -127,7 +130,8 @@ public class ShoppingCartController {
      * Default constructor for ShoppingCartController.
      * Called by JavaFX when loading the FXML file.
      */
-    public ShoppingCartController() {}
+    public ShoppingCartController() {
+    }
 
     /**
      * Initializes the controller.
@@ -149,8 +153,7 @@ public class ShoppingCartController {
 
         // Make columns fill the table width (no empty space on right)
         cartTable.setColumnResizePolicy(
-            TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS
-        );
+                TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         setupTableColumns();
         setupDeliveryOptions();
@@ -166,101 +169,141 @@ public class ShoppingCartController {
      */
     private void setupTableColumns() {
         // Image column
-        imageColumn.setCellFactory(col ->
-            new TableCell<CartItem, Void>() {
-                private final ImageView imageView = new ImageView();
+        imageColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
+            private final ImageView imageView = new ImageView();
 
-                {
-                    imageView.setFitWidth(40);
-                    imageView.setFitHeight(40);
-                    imageView.setPreserveRatio(true);
-                }
+            {
+                imageView.setFitWidth(40);
+                imageView.setFitHeight(40);
+                imageView.setPreserveRatio(true);
+            }
 
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        CartItem cartItem = getTableView()
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    CartItem cartItem = getTableView()
                             .getItems()
                             .get(getIndex());
-                        loadProductImage(imageView, cartItem.getProductName());
-                        setGraphic(imageView);
-                    }
+                    loadProductImage(imageView, cartItem.getProductName());
+                    setGraphic(imageView);
                 }
             }
-        );
+        });
 
-        productColumn.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getProductName())
-        );
+        productColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getProductName()));
 
-        quantityColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getQuantity()).asObject()
-        );
+        quantityColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getQuantity()).asObject());
 
-        priceColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                data.getValue().getPriceAtTime()
-            ).asObject()
-        );
-        priceColumn.setCellFactory(col ->
-            new TableCell<CartItem, Double>() {
-                @Override
-                protected void updateItem(Double price, boolean empty) {
-                    super.updateItem(price, empty);
-                    if (empty || price == null) {
-                        setText(null);
+        priceColumn.setCellValueFactory(data -> new SimpleDoubleProperty(
+                data.getValue().getPriceAtTime()).asObject());
+        priceColumn.setCellFactory(col -> new TableCell<CartItem, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", price));
+                }
+            }
+        });
+
+        totalColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTotalPrice()).asObject());
+        totalColumn.setCellFactory(col -> new TableCell<CartItem, Double>() {
+            @Override
+            protected void updateItem(Double total, boolean empty) {
+                super.updateItem(total, empty);
+                if (empty || total == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", total));
+                }
+            }
+        });
+
+        // Edit column with +/- buttons only (no editable text field)
+        editColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
+            private final Button minusBtn = new Button("-");
+            private final Button plusBtn = new Button("+");
+            private final Label qtyLabel = new Label();
+            private final HBox container = new HBox(5);
+
+            {
+                // Style buttons
+                minusBtn.setStyle(
+                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; " +
+                                "-fx-min-width: 28px; -fx-max-width: 28px; -fx-padding: 3 6 3 6;");
+                plusBtn.setStyle(
+                        "-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 10px; " +
+                                "-fx-min-width: 28px; -fx-max-width: 28px; -fx-padding: 3 6 3 6;");
+                qtyLabel.setStyle("-fx-font-size: 11px; -fx-min-width: 40px; -fx-alignment: center;");
+                qtyLabel.setAlignment(javafx.geometry.Pos.CENTER);
+
+                container.setAlignment(javafx.geometry.Pos.CENTER);
+                container.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
+
+                // Minus button action - decrease quantity by 0.5
+                minusBtn.setOnAction(e -> {
+                    CartItem item = getTableView().getItems().get(getIndex());
+                    double newQty = item.getQuantity() - 0.5;
+                    if (newQty >= 0.5) {
+                        updateItemQuantity(item, newQty);
+                    }
+                });
+
+                // Plus button action - increase quantity by 0.5
+                plusBtn.setOnAction(e -> {
+                    CartItem item = getTableView().getItems().get(getIndex());
+                    Product product = productDAO.findById(item.getProductId());
+                    double newQty = item.getQuantity() + 0.5;
+                    if (product != null && newQty <= product.getStock()) {
+                        updateItemQuantity(item, newQty);
                     } else {
-                        setText(String.format("$%.2f", price));
+                        AlertUtils.showWarning("Stock Limit",
+                                "Cannot add more - only " + (product != null ? product.getStock() : 0)
+                                        + " kg available.");
                     }
-                }
+                });
             }
-        );
 
-        totalColumn.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getTotalPrice()).asObject()
-        );
-        totalColumn.setCellFactory(col ->
-            new TableCell<CartItem, Double>() {
-                @Override
-                protected void updateItem(Double total, boolean empty) {
-                    super.updateItem(total, empty);
-                    if (empty || total == null) {
-                        setText(null);
-                    } else {
-                        setText(String.format("$%.2f", total));
-                    }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    CartItem cartItem = getTableView().getItems().get(getIndex());
+                    qtyLabel.setText(String.format("%.1f", cartItem.getQuantity()));
+                    setGraphic(container);
                 }
             }
-        );
+        });
 
         // Action column with compact remove button
-        actionColumn.setCellFactory(col ->
-            new TableCell<CartItem, Void>() {
-                private final Button removeBtn = new Button("✕");
+        actionColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
+            private final Button removeBtn = new Button("✕");
 
-                {
-                    removeBtn.setStyle(
-                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 2 6 2 6;"
-                    );
-                    removeBtn.setOnAction(e -> {
-                        CartItem item = getTableView()
+            {
+                removeBtn.setStyle(
+                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 2 6 2 6;");
+                removeBtn.setOnAction(e -> {
+                    CartItem item = getTableView()
                             .getItems()
                             .get(getIndex());
-                        cartManager.removeItem(item.getProductId());
-                        refreshCart();
-                    });
-                }
-
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setGraphic(empty ? null : removeBtn);
-                }
+                    cartManager.removeItem(item.getProductId());
+                    refreshCart();
+                });
             }
-        );
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : removeBtn);
+            }
+        });
     }
 
     /**
@@ -273,10 +316,8 @@ public class ShoppingCartController {
         for (String ext : extensions) {
             try {
                 Image image = new Image(
-                    getClass().getResourceAsStream(
-                        "/com/greengrocer/images/" + baseName + ext
-                    )
-                );
+                        getClass().getResourceAsStream(
+                                "/com/greengrocer/images/" + baseName + ext));
                 if (image != null && !image.isError()) {
                     imageView.setImage(image);
                     return;
@@ -290,24 +331,32 @@ public class ShoppingCartController {
     }
 
     /**
+     * Updates the quantity of a cart item and refreshes the display.
+     * 
+     * @param item        The cart item to update
+     * @param newQuantity The new quantity
+     */
+    private void updateItemQuantity(CartItem item, double newQuantity) {
+        cartManager.updateQuantity(item.getProductId(), newQuantity);
+        refreshCart();
+    }
+
+    /**
      * Sets up delivery date and time options.
      */
     private void setupDeliveryOptions() {
         // Date picker - only allow next 2 days
         LocalDate today = LocalDate.now();
-        deliveryDatePicker.setDayCellFactory(picker ->
-            new DateCell() {
-                @Override
-                public void updateItem(LocalDate date, boolean empty) {
-                    super.updateItem(date, empty);
-                    // Only allow dates within next 48 hours
-                    LocalDate maxDate = today.plusDays(2);
-                    setDisable(
-                        empty || date.isBefore(today) || date.isAfter(maxDate)
-                    );
-                }
+        deliveryDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                // Only allow dates within next 48 hours
+                LocalDate maxDate = today.plusDays(2);
+                setDisable(
+                        empty || date.isBefore(today) || date.isAfter(maxDate));
             }
-        );
+        });
         deliveryDatePicker.setValue(today);
 
         // Time slots
@@ -326,20 +375,18 @@ public class ShoppingCartController {
     private void loadCoupons() {
         List<Coupon> coupons = couponDAO.findUserCoupons(currentUser.getId());
         System.out.println(
-            "DEBUG: Loading coupons for user ID: " +
-                currentUser.getId() +
-                ", found " +
-                coupons.size() +
-                " coupons"
-        );
+                "DEBUG: Loading coupons for user ID: " +
+                        currentUser.getId() +
+                        ", found " +
+                        coupons.size() +
+                        " coupons");
         for (Coupon c : coupons) {
             System.out.println(
-                "DEBUG: Coupon found: " +
-                    c.getCode() +
-                    " - " +
-                    c.getDiscountPercent() +
-                    "%"
-            );
+                    "DEBUG: Coupon found: " +
+                            c.getCode() +
+                            " - " +
+                            c.getDiscountPercent() +
+                            "%");
         }
         couponCombo.getItems().clear();
         couponCombo.getItems().addAll(coupons);
@@ -374,20 +421,16 @@ public class ShoppingCartController {
             // User is eligible - show discount options
             loyaltyCombo.getItems().add("No discount");
             loyaltyCombo
-                .getItems()
-                .add(
-                    String.format(
-                        "Loyalty Discount: %.0f%% off",
-                        loyaltySettings.getDiscountPercent()
-                    )
-                );
+                    .getItems()
+                    .add(
+                            String.format(
+                                    "Loyalty Discount: %.0f%% off",
+                                    loyaltySettings.getDiscountPercent()));
             loyaltyCombo.setValue("No discount");
             loyaltyCalcLabel.setText(
-                String.format(
-                    "🎉 You have %d completed orders - discount unlocked!",
-                    completedOrders
-                )
-            );
+                    String.format(
+                            "🎉 You have %d completed orders - discount unlocked!",
+                            completedOrders));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         } else {
@@ -395,23 +438,19 @@ public class ShoppingCartController {
             loyaltyEligible = false;
             int remaining = requiredOrders - completedOrders;
             loyaltyCombo
-                .getItems()
-                .add(
-                    String.format(
-                        "Complete %d more order(s) to unlock %.0f%% off",
-                        remaining,
-                        loyaltySettings.getDiscountPercent()
-                    )
-                );
+                    .getItems()
+                    .add(
+                            String.format(
+                                    "Complete %d more order(s) to unlock %.0f%% off",
+                                    remaining,
+                                    loyaltySettings.getDiscountPercent()));
             loyaltyCombo.setValue(loyaltyCombo.getItems().get(0));
             loyaltyCombo.setDisable(true);
             loyaltyCalcLabel.setText(
-                String.format(
-                    "Progress: %d/%d orders completed",
-                    completedOrders,
-                    requiredOrders
-                )
-            );
+                    String.format(
+                            "Progress: %d/%d orders completed",
+                            completedOrders,
+                            requiredOrders));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
@@ -437,28 +476,23 @@ public class ShoppingCartController {
 
             // Show calculation
             loyaltyCalcLabel.setText(
-                String.format(
-                    "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
-                    subtotal,
-                    loyaltyDiscountPercent,
-                    newPrice,
-                    discountAmount
-                )
-            );
+                    String.format(
+                            "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
+                            subtotal,
+                            loyaltyDiscountPercent,
+                            newPrice,
+                            discountAmount));
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
         // Recalculate total discount
-        appliedDiscountPercent =
-            loyaltyDiscountPercent +
-            (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
+        appliedDiscountPercent = loyaltyDiscountPercent +
+                (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
         if (appliedDiscountPercent > 0) {
             discountLabel.setText(
-                String.format(
-                    "Total Discount (%.0f%%):",
-                    appliedDiscountPercent
-                )
-            );
+                    String.format(
+                            "Total Discount (%.0f%%):",
+                            appliedDiscountPercent));
             discountRow.setVisible(true);
             discountRow.setManaged(true);
         } else {
@@ -474,6 +508,7 @@ public class ShoppingCartController {
     private void refreshCart() {
         List<CartItem> items = cartManager.getItems();
         cartTable.setItems(FXCollections.observableArrayList(items));
+        cartTable.refresh(); // Force visual refresh of the table
         updateTotals();
         checkMinimum();
     }
@@ -505,15 +540,12 @@ public class ShoppingCartController {
      */
     private void checkMinimum() {
         if (!cartManager.meetsMinimum()) {
-            double needed =
-                CartManager.MINIMUM_CART_VALUE - cartManager.getSubtotal();
+            double needed = CartManager.MINIMUM_CART_VALUE - cartManager.getSubtotal();
             minimumWarning.setText(
-                String.format(
-                    "Minimum order: $%.2f. Add $%.2f more.",
-                    CartManager.MINIMUM_CART_VALUE,
-                    needed
-                )
-            );
+                    String.format(
+                            "Minimum order: $%.2f. Add $%.2f more.",
+                            CartManager.MINIMUM_CART_VALUE,
+                            needed));
             minimumWarning.setVisible(true);
             minimumWarning.setManaged(true);
             checkoutButton.setDisable(true);
@@ -532,38 +564,32 @@ public class ShoppingCartController {
         Coupon selected = couponCombo.getValue();
         if (selected == null) {
             AlertUtils.showWarning(
-                "No Coupon",
-                "Please select a coupon to apply."
-            );
+                    "No Coupon",
+                    "Please select a coupon to apply.");
             return;
         }
 
         if (!selected.isValid()) {
             AlertUtils.showWarning(
-                "Cannot Apply",
-                "This coupon is no longer valid. It may have expired or reached its usage limit."
-            );
+                    "Cannot Apply",
+                    "This coupon is no longer valid. It may have expired or reached its usage limit.");
             return;
         }
 
         if (!selected.meetsMinimum(cartManager.getSubtotal())) {
             AlertUtils.showWarning(
-                "Cannot Apply",
-                String.format(
-                    "Minimum order value of $%.2f required for this coupon.",
-                    selected.getMinOrderValue()
-                )
-            );
+                    "Cannot Apply",
+                    String.format(
+                            "Minimum order value of $%.2f required for this coupon.",
+                            selected.getMinOrderValue()));
             return;
         }
 
         // Add coupon discount to existing loyalty discount
         appliedCoupon = selected;
-        appliedDiscountPercent =
-            loyaltyDiscountPercent + selected.getDiscountPercent();
+        appliedDiscountPercent = loyaltyDiscountPercent + selected.getDiscountPercent();
         discountLabel.setText(
-            String.format("Discount (%.0f%%):", appliedDiscountPercent)
-        );
+                String.format("Discount (%.0f%%):", appliedDiscountPercent));
         discountRow.setVisible(true);
 
         couponCombo.setDisable(true);
@@ -572,8 +598,7 @@ public class ShoppingCartController {
         updateTotals();
 
         AlertUtils.showSuccess(
-            "Coupon applied: " + selected.getDiscountPercent() + "% off!"
-        );
+                "Coupon applied: " + selected.getDiscountPercent() + "% off!");
     }
 
     /**
@@ -594,8 +619,7 @@ public class ShoppingCartController {
         // Update discount display
         if (appliedDiscountPercent > 0) {
             discountLabel.setText(
-                String.format("Discount (%.0f%%):", appliedDiscountPercent)
-            );
+                    String.format("Discount (%.0f%%):", appliedDiscountPercent));
             discountRow.setVisible(true);
             discountRow.setManaged(true);
         } else {
@@ -612,12 +636,9 @@ public class ShoppingCartController {
      */
     @FXML
     private void handleClearCart(ActionEvent event) {
-        if (
-            AlertUtils.showConfirmation(
+        if (AlertUtils.showConfirmation(
                 "Clear Cart",
-                "Remove all items from cart?"
-            )
-        ) {
+                "Remove all items from cart?")) {
             cartManager.clear();
             refreshCart();
         }
@@ -639,20 +660,17 @@ public class ShoppingCartController {
     private void handleCheckout(ActionEvent event) {
         if (cartManager.isEmpty()) {
             AlertUtils.showWarning(
-                "Empty Cart",
-                "Please add items to your cart before checkout."
-            );
+                    "Empty Cart",
+                    "Please add items to your cart before checkout.");
             return;
         }
 
         if (!cartManager.meetsMinimum()) {
             AlertUtils.showWarning(
-                "Minimum Not Met",
-                String.format(
-                    "Minimum order value is $%.2f",
-                    CartManager.MINIMUM_CART_VALUE
-                )
-            );
+                    "Minimum Not Met",
+                    String.format(
+                            "Minimum order value is $%.2f",
+                            CartManager.MINIMUM_CART_VALUE));
             return;
         }
 
@@ -662,41 +680,34 @@ public class ShoppingCartController {
 
         if (deliveryDate == null || deliveryTime == null) {
             AlertUtils.showValidationError(
-                "Please select a delivery date and time."
-            );
+                    "Please select a delivery date and time.");
             return;
         }
 
         // Parse delivery datetime
         String[] timeParts = deliveryTime.split(":");
         LocalTime time = LocalTime.of(
-            Integer.parseInt(timeParts[0]),
-            Integer.parseInt(timeParts[1])
-        );
+                Integer.parseInt(timeParts[0]),
+                Integer.parseInt(timeParts[1]));
         LocalDateTime requestedDelivery = LocalDateTime.of(deliveryDate, time);
 
         // Validate within 48 hours
         if (requestedDelivery.isAfter(LocalDateTime.now().plusHours(48))) {
             AlertUtils.showValidationError(
-                "Delivery must be within 48 hours from now."
-            );
+                    "Delivery must be within 48 hours from now.");
             return;
         }
 
         // Verify stock one more time
         for (CartItem item : cartManager.getItems()) {
-            if (
-                !productDAO.hasEnoughStock(
+            if (!productDAO.hasEnoughStock(
                     item.getProductId(),
-                    item.getQuantity()
-                )
-            ) {
+                    item.getQuantity())) {
                 AlertUtils.showError(
-                    "Stock Issue",
-                    "Sorry, " +
-                        item.getProductName() +
-                        " no longer has sufficient stock."
-                );
+                        "Stock Issue",
+                        "Sorry, " +
+                                item.getProductName() +
+                                " no longer has sufficient stock.");
                 return;
             }
         }
@@ -725,31 +736,28 @@ public class ShoppingCartController {
         // Add items to order
         for (CartItem cartItem : cartManager.getItems()) {
             OrderItem orderItem = new OrderItem(
-                0,
-                cartItem.getProductId(),
-                cartItem.getProductName(),
-                cartItem.getQuantity(),
-                cartItem.getPriceAtTime()
-            );
+                    0,
+                    cartItem.getProductId(),
+                    cartItem.getProductName(),
+                    cartItem.getQuantity(),
+                    cartItem.getPriceAtTime());
             order.addItem(orderItem);
         }
 
         // Generate text invoice
         String invoice = InvoiceGenerator.generateInvoice(
-            order,
-            currentUser,
-            cartManager.getItems(),
-            appliedDiscountPercent
-        );
+                order,
+                currentUser,
+                cartManager.getItems(),
+                appliedDiscountPercent);
         order.setInvoice(invoice);
 
         // Generate PDF invoice
         byte[] pdfInvoice = PdfInvoiceGenerator.generatePdfInvoice(
-            order,
-            currentUser,
-            cartManager.getItems(),
-            appliedDiscountPercent
-        );
+                order,
+                currentUser,
+                cartManager.getItems(),
+                appliedDiscountPercent);
         order.setInvoicePdf(pdfInvoice);
 
         // Save order
@@ -760,11 +768,9 @@ public class ShoppingCartController {
             for (CartItem item : cartManager.getItems()) {
                 // Get product state before stock update
                 Product productBefore = productDAO.findById(
-                    item.getProductId()
-                );
-                boolean wasAboveThreshold =
-                    productBefore != null &&
-                    productBefore.getStock() > productBefore.getThreshold();
+                        item.getProductId());
+                boolean wasAboveThreshold = productBefore != null &&
+                        productBefore.getStock() > productBefore.getThreshold();
 
                 // Update stock
                 productDAO.updateStock(item.getProductId(), item.getQuantity());
@@ -786,13 +792,18 @@ public class ShoppingCartController {
             // Mark coupon as used if applied
             if (appliedCoupon != null) {
                 couponDAO.markCouponUsed(
-                    currentUser.getId(),
-                    appliedCoupon.getId()
-                );
+                        currentUser.getId(),
+                        appliedCoupon.getId());
             }
 
-            // Increment user's completed orders for loyalty discount eligibility
-            userDAO.incrementCompletedOrders(currentUser.getId());
+            // Reset completed orders count if loyalty discount was used
+            // User must earn the discount again by completing more orders
+            if (loyaltyDiscountPercent > 0) {
+                userDAO.resetCompletedOrders(currentUser.getId());
+            }
+
+            // NOTE: Completed orders count is incremented by CarrierController
+            // when the order is marked as DELIVERED, not here when placed.
 
             // Show invoice
             showInvoiceDialog(invoice, orderId);
@@ -805,9 +816,8 @@ public class ShoppingCartController {
             stage.close();
         } else {
             AlertUtils.showError(
-                "Order Failed",
-                "Could not create order. Please try again."
-            );
+                    "Order Failed",
+                    "Could not create order. Please try again.");
         }
     }
 
@@ -823,27 +833,24 @@ public class ShoppingCartController {
             return;
         }
 
-        String subject =
-            "⚠️ Stock Alert: " + product.getName() + " is OUT OF STOCK";
+        String subject = "⚠️ Stock Alert: " + product.getName() + " is OUT OF STOCK";
         String content = String.format(
-            "STOCK ALERT\n\n" +
-                "Product: %s\n" +
-                "Type: %s\n" +
-                "Current Stock: %.2f kg\n" +
-                "Status: OUT OF STOCK\n\n" +
-                "Action Required: Please restock this product as soon as possible.\n\n" +
-                "This notification was automatically generated after a customer order.",
-            product.getName(),
-            product.getType(),
-            product.getStock()
-        );
+                "STOCK ALERT\n\n" +
+                        "Product: %s\n" +
+                        "Type: %s\n" +
+                        "Current Stock: %.2f kg\n" +
+                        "Status: OUT OF STOCK\n\n" +
+                        "Action Required: Please restock this product as soon as possible.\n\n" +
+                        "This notification was automatically generated after a customer order.",
+                product.getName(),
+                product.getType(),
+                product.getStock());
 
         Message notification = new Message(
-            currentUser.getId(),
-            owner.getId(),
-            subject,
-            content
-        );
+                currentUser.getId(),
+                owner.getId(),
+                subject,
+                content);
         messageDAO.send(notification);
     }
 
@@ -859,34 +866,32 @@ public class ShoppingCartController {
             return;
         }
 
-        String subject =
-            "⚠️ Price Alert: " + product.getName() + " - PRICE DOUBLED";
+        String subject = "⚠️ Price Alert: " + product.getName() + " - PRICE DOUBLED";
         String content = String.format(
-            "THRESHOLD ALERT\n\n" +
-                "Product: %s\n" +
-                "Type: %s\n" +
-                "Current Stock: %.2f kg\n" +
-                "Threshold: %.2f kg\n" +
-                "Status: LOW STOCK - PRICE DOUBLED\n\n" +
-                "Original Price: $%.2f/kg\n" +
-                "Current Price: $%.2f/kg (2x)\n\n" +
-                "The stock has fallen below the threshold. The price has been automatically doubled for customers.\n\n" +
-                "Action Required: Consider restocking this product soon.\n\n" +
-                "This notification was automatically generated after a customer order.",
-            product.getName(),
-            product.getType(),
-            product.getStock(),
-            product.getThreshold(),
-            product.getPrice(),
-            product.getDisplayPrice()
-        );
+                "THRESHOLD ALERT\n\n" +
+                        "Product: %s\n" +
+                        "Type: %s\n" +
+                        "Current Stock: %.2f kg\n" +
+                        "Threshold: %.2f kg\n" +
+                        "Status: LOW STOCK - PRICE DOUBLED\n\n" +
+                        "Original Price: $%.2f/kg\n" +
+                        "Current Price: $%.2f/kg (2x)\n\n" +
+                        "The stock has fallen below the threshold. The price has been automatically doubled for customers.\n\n"
+                        +
+                        "Action Required: Consider restocking this product soon.\n\n" +
+                        "This notification was automatically generated after a customer order.",
+                product.getName(),
+                product.getType(),
+                product.getStock(),
+                product.getThreshold(),
+                product.getPrice(),
+                product.getDisplayPrice());
 
         Message notification = new Message(
-            currentUser.getId(),
-            owner.getId(),
-            subject,
-            content
-        );
+                currentUser.getId(),
+                owner.getId(),
+                subject,
+                content);
         messageDAO.send(notification);
     }
 
@@ -900,46 +905,36 @@ public class ShoppingCartController {
 
         for (CartItem item : cartManager.getItems()) {
             summary.append(
-                String.format(
-                    "%s: %.2f kg @ $%.2f = $%.2f\n",
-                    item.getProductName(),
-                    item.getQuantity(),
-                    item.getPriceAtTime(),
-                    item.getTotalPrice()
-                )
-            );
+                    String.format(
+                            "%s: %.2f kg @ $%.2f = $%.2f\n",
+                            item.getProductName(),
+                            item.getQuantity(),
+                            item.getPriceAtTime(),
+                            item.getTotalPrice()));
         }
 
         summary.append("\n─────────────────────────\n");
         summary.append(
-            String.format("Subtotal: $%.2f\n", cartManager.getSubtotal())
-        );
+                String.format("Subtotal: $%.2f\n", cartManager.getSubtotal()));
 
         if (appliedDiscountPercent > 0) {
             summary.append(
-                String.format(
-                    "Discount (%.0f%%): -$%.2f\n",
-                    appliedDiscountPercent,
-                    cartManager.getDiscountAmount(appliedDiscountPercent)
-                )
-            );
+                    String.format(
+                            "Discount (%.0f%%): -$%.2f\n",
+                            appliedDiscountPercent,
+                            cartManager.getDiscountAmount(appliedDiscountPercent)));
         }
 
-        double afterDiscount =
-            cartManager.getSubtotal() -
-            cartManager.getDiscountAmount(appliedDiscountPercent);
+        double afterDiscount = cartManager.getSubtotal() -
+                cartManager.getDiscountAmount(appliedDiscountPercent);
         summary.append(
-            String.format(
-                "VAT (18%%): $%.2f\n",
-                afterDiscount * CartManager.VAT_RATE
-            )
-        );
+                String.format(
+                        "VAT (18%%): $%.2f\n",
+                        afterDiscount * CartManager.VAT_RATE));
         summary.append(
-            String.format(
-                "TOTAL: $%.2f\n",
-                afterDiscount + afterDiscount * CartManager.VAT_RATE
-            )
-        );
+                String.format(
+                        "TOTAL: $%.2f\n",
+                        afterDiscount + afterDiscount * CartManager.VAT_RATE));
         summary.append("\nDelivery: ").append(deliveryTime.toString());
 
         return AlertUtils.showConfirmation("Confirm Order", summary.toString());

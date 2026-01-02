@@ -23,7 +23,32 @@ public class OrderDAO {
      * Constructor - initializes database adapter.
      */
     public OrderDAO() {
+        super();
         this.db = DatabaseAdapter.getInstance();
+        // Ensure notification columns exist
+        try {
+            // Add customer_notified column if it doesn't exist
+            String checkCustomerCol = "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'OrderInfo' " +
+                    "AND COLUMN_NAME = 'customer_notified'";
+            ResultSet rs = db.executeQuery(checkCustomerCol);
+            if (rs.next() && rs.getInt(1) == 0) {
+                db.executeUpdate("ALTER TABLE OrderInfo ADD COLUMN customer_notified BOOLEAN DEFAULT FALSE");
+                System.out.println("Added customer_notified column to OrderInfo");
+            }
+
+            // Add owner_notified column if it doesn't exist
+            String checkOwnerCol = "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'OrderInfo' " +
+                    "AND COLUMN_NAME = 'owner_notified'";
+            rs = db.executeQuery(checkOwnerCol);
+            if (rs.next() && rs.getInt(1) == 0) {
+                db.executeUpdate("ALTER TABLE OrderInfo ADD COLUMN owner_notified BOOLEAN DEFAULT FALSE");
+                System.out.println("Added owner_notified column to OrderInfo");
+            }
+        } catch (SQLException e) {
+            System.err.println("Database schema update error: " + e.getMessage());
+        }
     }
 
     /**
@@ -332,6 +357,7 @@ public class OrderDAO {
 
     /**
      * Cancels an order within allowed time frame (24 hours from order placement).
+     * Also restores the stock for all items in the order.
      * 
      * @param orderId The order ID
      * @return true if successful
@@ -343,11 +369,25 @@ public class OrderDAO {
                 "AND TIMESTAMPDIFF(HOUR, order_time, NOW()) <= 24";
 
         try {
+            // First, get the order items to restore stock
+            List<OrderItem> items = getOrderItems(orderId);
+
+            // Update order status to CANCELLED
             PreparedStatement stmt = db.prepareStatement(query);
             stmt.setInt(1, orderId);
 
             int rows = stmt.executeUpdate();
-            return rows > 0;
+
+            if (rows > 0) {
+                // Order was successfully cancelled, now restore stock for each item
+                ProductDAO productDAO = new ProductDAO();
+                for (OrderItem item : items) {
+                    productDAO.restoreStock(item.getProductId(), item.getQuantity());
+                }
+                return true;
+            }
+
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Cancel order error: " + e.getMessage());
@@ -598,5 +638,101 @@ public class OrderDAO {
         }
 
         return order;
+    }
+
+    /**
+     * Gets unnotified delivered orders for a specific customer.
+     * 
+     * @param customerId The customer ID
+     * @return List of unnotified delivered orders
+     */
+    public List<Order> getUnnotifiedDeliveredOrdersForCustomer(int customerId) {
+        String query = "SELECT o.*, " +
+                "c.username as customer_name, c.address as customer_address, " +
+                "carr.username as carrier_name " +
+                "FROM OrderInfo o " +
+                "JOIN UserInfo c ON o.user_id = c.id " +
+                "LEFT JOIN UserInfo carr ON o.carrier_id = carr.id " +
+                "WHERE o.user_id = ? AND o.status = 'DELIVERED' AND (o.customer_notified = FALSE OR o.customer_notified IS NULL)";
+
+        List<Order> orders = new ArrayList<>();
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                orders.add(extractOrderFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Get unnotified orders for customer error: " + e.getMessage());
+        }
+        return orders;
+    }
+
+    /**
+     * Gets unnotified delivered orders for the owner.
+     * 
+     * @return List of unnotified delivered orders
+     */
+    public List<Order> getUnnotifiedDeliveredOrdersForOwner() {
+        String query = "SELECT o.*, " +
+                "cust.username as customer_name, cust.address as customer_address, " +
+                "carr.username as carrier_name " +
+                "FROM OrderInfo o " +
+                "JOIN UserInfo cust ON o.user_id = cust.id " +
+                "LEFT JOIN UserInfo carr ON o.carrier_id = carr.id " +
+                "WHERE o.status = 'DELIVERED' AND (o.owner_notified = FALSE OR o.owner_notified IS NULL)";
+
+        List<Order> orders = new ArrayList<>();
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Order order = extractOrderFromResultSet(rs);
+                // Manually set carrier name if available from join
+                try {
+                    String carrierName = rs.getString("carrier_name");
+                    if (carrierName != null) {
+                        order.setCarrierName(carrierName);
+                    }
+                } catch (SQLException e) {
+                    // Ignore if column missing
+                }
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            System.err.println("Get unnotified orders for owner error: " + e.getMessage());
+        }
+        return orders;
+    }
+
+    /**
+     * Marks orders as notified for a specific user type.
+     * 
+     * @param orderIds List of order IDs to mark
+     * @param userType "CUSTOMER" or "OWNER"
+     */
+    public void markOrdersAsNotified(List<Integer> orderIds, String userType) {
+        if (orderIds == null || orderIds.isEmpty())
+            return;
+
+        String column = userType.equalsIgnoreCase("CUSTOMER") ? "customer_notified" : "owner_notified";
+        StringBuilder query = new StringBuilder("UPDATE OrderInfo SET " + column + " = TRUE WHERE id IN (");
+
+        for (int i = 0; i < orderIds.size(); i++) {
+            query.append(orderIds.get(i));
+            if (i < orderIds.size() - 1) {
+                query.append(",");
+            }
+        }
+        query.append(")");
+
+        try {
+            db.executeUpdate(query.toString());
+        } catch (Exception e) {
+            System.err.println("Mark orders notified error: " + e.getMessage());
+        }
     }
 }

@@ -11,6 +11,8 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 /**
@@ -56,6 +58,19 @@ public class LoginController {
         userDAO = new UserDAO();
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
+    }
+
+    /**
+     * Handles key press events in the login form.
+     * Triggers login when Enter key is pressed.
+     * 
+     * @param event The key event
+     */
+    @FXML
+    private void handleKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            handleLogin(null);
+        }
     }
 
     /**

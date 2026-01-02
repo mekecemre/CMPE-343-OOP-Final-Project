@@ -17,6 +17,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -76,7 +78,8 @@ public class CustomerController {
      * Default constructor for CustomerController.
      * Called by JavaFX when loading the FXML file.
      */
-    public CustomerController() {}
+    public CustomerController() {
+    }
 
     /**
      * Initializes the controller.
@@ -103,8 +106,8 @@ public class CustomerController {
 
         // Setup sort combo box
         sortComboBox
-            .getItems()
-            .addAll("Default", "Price: Low to High", "Price: High to Low");
+                .getItems()
+                .addAll("Default", "Price: Low to High", "Price: High to Low");
         sortComboBox.setValue("Default");
 
         // Load products
@@ -112,14 +115,53 @@ public class CustomerController {
 
         // Add search field listener for real-time search
         searchField
-            .textProperty()
-            .addListener((observable, oldValue, newValue) -> {
-                if (newValue.isEmpty()) {
-                    loadProducts();
-                }
-            });
+                .textProperty()
+                .addListener((observable, oldValue, newValue) -> {
+                    if (newValue.isEmpty()) {
+                        loadProducts();
+                    }
+                });
 
         statusLabel.setText("Browse our fresh products!");
+
+        // Check for delivery notifications
+        checkDeliveryNotifications();
+    }
+
+    /**
+     * Checks for unnotified delivered orders and shows a popup.
+     */
+    private void checkDeliveryNotifications() {
+        System.out.println("Checking for delivery notifications for user: " + currentUser.getId());
+        List<Order> unnotified = orderDAO.getUnnotifiedDeliveredOrdersForCustomer(currentUser.getId());
+        System.out.println("Found " + unnotified.size() + " unnotified orders.");
+
+        if (!unnotified.isEmpty()) {
+            StringBuilder message = new StringBuilder("The following orders have been delivered:\n\n");
+            List<Integer> orderIds = new java.util.ArrayList<>();
+
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm");
+
+            for (Order order : unnotified) {
+                String timeStr = order.getDeliveryTime() != null ? order.getDeliveryTime().format(formatter)
+                        : "Recently";
+
+                message.append("• Order #").append(order.getId())
+                        .append(" at ").append(timeStr).append("\n");
+                orderIds.add(order.getId());
+            }
+
+            // Mark as notified immediately
+            orderDAO.markOrdersAsNotified(orderIds, "CUSTOMER");
+
+            // Show popup
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Delivery Notification");
+            alert.setHeaderText("Orders Delivered!");
+            alert.setContentText(message.toString());
+            alert.show();
+        }
     }
 
     /**
@@ -175,8 +217,7 @@ public class CustomerController {
         if (product.getImage() != null) {
             try {
                 Image image = new Image(
-                    new ByteArrayInputStream(product.getImage())
-                );
+                        new ByteArrayInputStream(product.getImage()));
                 imageView.setImage(image);
             } catch (Exception e) {
                 loadImageFromFile(imageView, product.getName());
@@ -198,20 +239,17 @@ public class CustomerController {
         // Show threshold warning if applicable
         if (product.isLowStock()) {
             priceLabel.setStyle(
-                "-fx-text-fill: #e74c3c; -fx-font-weight: bold;"
-            );
+                    "-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
             Label thresholdLabel = new Label("Low Stock - Price Doubled!");
             thresholdLabel.getStyleClass().add("threshold-warning");
             thresholdLabel.setStyle(
-                "-fx-text-fill: #e74c3c; -fx-font-size: 9px;"
-            );
+                    "-fx-text-fill: #e74c3c; -fx-font-size: 9px;");
             card.getChildren().add(thresholdLabel);
         }
 
         // Stock info
         Label stockLabel = new Label(
-            String.format("Stock: %.1f kg", product.getStock())
-        );
+                String.format("Stock: %.1f kg", product.getStock()));
         stockLabel.getStyleClass().add("product-stock");
         stockLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #666;");
 
@@ -231,8 +269,8 @@ public class CustomerController {
         addBox.getChildren().addAll(quantityField, addButton);
 
         card
-            .getChildren()
-            .addAll(imageView, nameLabel, priceLabel, stockLabel, addBox);
+                .getChildren()
+                .addAll(imageView, nameLabel, priceLabel, stockLabel, addBox);
 
         return card;
     }
@@ -251,10 +289,8 @@ public class CustomerController {
             try {
                 // Try to load product-specific image
                 Image image = new Image(
-                    getClass().getResourceAsStream(
-                        "/com/greengrocer/images/" + baseName + ext
-                    )
-                );
+                        getClass().getResourceAsStream(
+                                "/com/greengrocer/images/" + baseName + ext));
                 if (image != null && !image.isError()) {
                     imageView.setImage(image);
                     return;
@@ -275,10 +311,8 @@ public class CustomerController {
     private void loadPlaceholder(ImageView imageView) {
         try {
             Image placeholder = new Image(
-                getClass().getResourceAsStream(
-                    "/com/greengrocer/images/placeholder.png"
-                )
-            );
+                    getClass().getResourceAsStream(
+                            "/com/greengrocer/images/placeholder.png"));
             if (placeholder != null && !placeholder.isError()) {
                 imageView.setImage(placeholder);
             } else {
@@ -301,8 +335,7 @@ public class CustomerController {
         // Validate quantity input
         if (!ValidationUtils.isValidPositiveDouble(quantityText)) {
             AlertUtils.showValidationError(
-                "Please enter a valid positive quantity (e.g., 0.5, 1, 2.25)"
-            );
+                    "Please enter a valid positive quantity (e.g., 0.5, 1, 2.25)");
             return;
         }
 
@@ -326,13 +359,11 @@ public class CustomerController {
 
         if (quantity + alreadyInCart > product.getStock()) {
             AlertUtils.showWarning(
-                "Insufficient Stock",
-                String.format(
-                    "Only %.2f kg available (%.2f kg already in cart).",
-                    product.getStock(),
-                    alreadyInCart
-                )
-            );
+                    "Insufficient Stock",
+                    String.format(
+                            "Only %.2f kg available (%.2f kg already in cart).",
+                            product.getStock(),
+                            alreadyInCart));
             return;
         }
 
@@ -343,21 +374,17 @@ public class CustomerController {
         updateCartButton();
         quantityField.clear();
         statusLabel.setText(
-            String.format(
-                "Added %.2f kg of %s to cart!",
-                quantity,
-                product.getName()
-            )
-        );
+                String.format(
+                        "Added %.2f kg of %s to cart!",
+                        quantity,
+                        product.getName()));
 
         AlertUtils.showInfo(
-            "Added to Cart",
-            String.format(
-                "%.2f kg of %s added to your cart.",
-                quantity,
-                product.getName()
-            )
-        );
+                "Added to Cart",
+                String.format(
+                        "%.2f kg of %s added to your cart.",
+                        quantity,
+                        product.getName()));
     }
 
     /**
@@ -377,22 +404,30 @@ public class CustomerController {
 
         if (settings.isEligible(completedOrders)) {
             loyaltyLabel.setText(
-                String.format(
-                    "* Loyalty Member - %.0f%% discount!",
-                    settings.getDiscountPercent()
-                )
-            );
+                    String.format(
+                            "* Loyalty Member - %.0f%% discount!",
+                            settings.getDiscountPercent()));
             loyaltyLabel.setStyle("-fx-text-fill: #27ae60;");
         } else {
-            int ordersNeeded =
-                settings.getMinOrdersForDiscount() - completedOrders;
+            int ordersNeeded = settings.getMinOrdersForDiscount() - completedOrders;
             loyaltyLabel.setText(
-                String.format(
-                    "Complete %d more orders for %.0f%% loyalty discount!",
-                    ordersNeeded,
-                    settings.getDiscountPercent()
-                )
-            );
+                    String.format(
+                            "Complete %d more orders for %.0f%% loyalty discount!",
+                            ordersNeeded,
+                            settings.getDiscountPercent()));
+        }
+    }
+
+    /**
+     * Handles key press events in the search field.
+     * Triggers search when Enter key is pressed.
+     * 
+     * @param event The key event
+     */
+    @FXML
+    private void handleSearchKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            handleSearch(null);
         }
     }
 
@@ -415,7 +450,7 @@ public class CustomerController {
         fruitsContainer.getChildren().clear();
 
         int vegCount = 0,
-            fruitCount = 0;
+                fruitCount = 0;
 
         for (Product product : results) {
             VBox card = createProductCard(product);
@@ -432,8 +467,7 @@ public class CustomerController {
         fruitsPane.setText("[F] Fruits (" + fruitCount + ")");
 
         statusLabel.setText(
-            "Found " + results.size() + " products for '" + keyword + "'"
-        );
+                "Found " + results.size() + " products for '" + keyword + "'");
     }
 
     /**
@@ -466,20 +500,12 @@ public class CustomerController {
 
         // Sort based on selection
         if (sortOption.equals("Price: Low to High")) {
-            vegetables.sort((p1, p2) ->
-                Double.compare(p1.getDisplayPrice(), p2.getDisplayPrice())
-            );
-            fruits.sort((p1, p2) ->
-                Double.compare(p1.getDisplayPrice(), p2.getDisplayPrice())
-            );
+            vegetables.sort((p1, p2) -> Double.compare(p1.getDisplayPrice(), p2.getDisplayPrice()));
+            fruits.sort((p1, p2) -> Double.compare(p1.getDisplayPrice(), p2.getDisplayPrice()));
             statusLabel.setText("Products sorted by price (lowest first)");
         } else if (sortOption.equals("Price: High to Low")) {
-            vegetables.sort((p1, p2) ->
-                Double.compare(p2.getDisplayPrice(), p1.getDisplayPrice())
-            );
-            fruits.sort((p1, p2) ->
-                Double.compare(p2.getDisplayPrice(), p1.getDisplayPrice())
-            );
+            vegetables.sort((p1, p2) -> Double.compare(p2.getDisplayPrice(), p1.getDisplayPrice()));
+            fruits.sort((p1, p2) -> Double.compare(p2.getDisplayPrice(), p1.getDisplayPrice()));
             statusLabel.setText("Products sorted by price (highest first)");
         }
 
@@ -497,10 +523,8 @@ public class CustomerController {
     private void handleOpenCart(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource(
-                    "/com/greengrocer/views/ShoppingCart.fxml"
-                )
-            );
+                    getClass().getResource(
+                            "/com/greengrocer/views/ShoppingCart.fxml"));
             Parent root = loader.load();
 
             ShoppingCartController cartController = loader.getController();
@@ -510,12 +534,11 @@ public class CustomerController {
             cartStage.setTitle("Shopping Cart - Group17 GreenGrocer");
             Scene scene = new Scene(root, 700, 600);
             scene
-                .getStylesheets()
-                .add(
-                    getClass()
-                        .getResource("/com/greengrocer/styles/application.css")
-                        .toExternalForm()
-                );
+                    .getStylesheets()
+                    .add(
+                            getClass()
+                                    .getResource("/com/greengrocer/styles/application.css")
+                                    .toExternalForm());
             cartStage.setScene(scene);
             cartStage.initModality(Modality.APPLICATION_MODAL);
             cartStage.showAndWait();
@@ -530,16 +553,14 @@ public class CustomerController {
             updateLoyaltyStatus();
         } catch (Exception e) {
             System.err.println(
-                "ERROR opening cart: " +
-                    e.getClass().getName() +
-                    ": " +
-                    e.getMessage()
-            );
+                    "ERROR opening cart: " +
+                            e.getClass().getName() +
+                            ": " +
+                            e.getMessage());
             e.printStackTrace();
             AlertUtils.showError(
-                "Error",
-                "Could not open shopping cart: " + e.getMessage()
-            );
+                    "Error",
+                    "Could not open shopping cart: " + e.getMessage());
         }
     }
 
@@ -566,128 +587,100 @@ public class CustomerController {
             ListView<Order> orderList = new ListView<>();
             orderList.getItems().addAll(orders);
 
-            orderList.setCellFactory(lv ->
-                new ListCell<Order>() {
-                    @Override
-                    protected void updateItem(Order order, boolean empty) {
-                        super.updateItem(order, empty);
-                        if (empty || order == null) {
-                            setText(null);
-                            setGraphic(null);
-                        } else {
-                            VBox cell = new VBox(5);
-                            cell.setPadding(new Insets(5));
+            orderList.setCellFactory(lv -> new ListCell<Order>() {
+                @Override
+                protected void updateItem(Order order, boolean empty) {
+                    super.updateItem(order, empty);
+                    if (empty || order == null) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
+                        VBox cell = new VBox(5);
+                        cell.setPadding(new Insets(5));
 
-                            Label idLabel = new Label(
+                        Label idLabel = new Label(
                                 "Order #" +
-                                    order.getId() +
-                                    " - " +
-                                    order.getStatus()
-                            );
-                            idLabel.setStyle("-fx-font-weight: bold;");
+                                        order.getId() +
+                                        " - " +
+                                        order.getStatus());
+                        idLabel.setStyle("-fx-font-weight: bold;");
 
-                            Label dateLabel = new Label(
-                                "Ordered: " + order.getOrderTime().toString()
-                            );
-                            Label totalLabel = new Label(
+                        Label dateLabel = new Label(
+                                "Ordered: " + order.getOrderTime().toString());
+                        Label totalLabel = new Label(
                                 String.format(
-                                    "Total: $%.2f",
-                                    order.getTotalCost()
-                                )
-                            );
+                                        "Total: $%.2f",
+                                        order.getTotalCost()));
 
-                            HBox actions = new HBox(10);
+                        HBox actions = new HBox(10);
 
-                            // View details button
-                            Button viewBtn = new Button("View Invoice");
-                            viewBtn.setOnAction(e -> showInvoice(order));
-                            actions.getChildren().add(viewBtn);
+                        // View details button
+                        Button viewBtn = new Button("View Invoice");
+                        viewBtn.setOnAction(e -> showInvoice(order));
+                        actions.getChildren().add(viewBtn);
 
-                            // Cancel button (only for pending orders within 24 hour time limit)
-                            if (order.isPending()) {
-                                if (orderDAO.canCancelOrder(order.getId())) {
-                                    int hoursRemaining =
-                                        orderDAO.getHoursRemainingToCancel(
-                                            order.getId()
-                                        );
-                                    Button cancelBtn = new Button(
-                                        "Cancel (" + hoursRemaining + "h left)"
-                                    );
-                                    cancelBtn.setStyle(
-                                        "-fx-background-color: #e74c3c; -fx-text-fill: white;"
-                                    );
-                                    cancelBtn.setOnAction(e -> {
-                                        if (
-                                            AlertUtils.showConfirmation(
-                                                "Cancel Order",
-                                                "Are you sure you want to cancel this order?\n" +
+                        // Cancel button (only for pending orders within 24 hour time limit)
+                        if (order.isPending()) {
+                            if (orderDAO.canCancelOrder(order.getId())) {
+                                int hoursRemaining = orderDAO.getHoursRemainingToCancel(
+                                        order.getId());
+                                Button cancelBtn = new Button(
+                                        "Cancel (" + hoursRemaining + "h left)");
+                                cancelBtn.setStyle(
+                                        "-fx-background-color: #e74c3c; -fx-text-fill: white;");
+                                cancelBtn.setOnAction(e -> {
+                                    if (AlertUtils.showConfirmation(
+                                            "Cancel Order",
+                                            "Are you sure you want to cancel this order?\n" +
                                                     "You have " +
                                                     hoursRemaining +
-                                                    " hour(s) remaining to cancel."
-                                            )
-                                        ) {
-                                            if (
-                                                orderDAO.cancelOrder(
-                                                    order.getId()
-                                                )
-                                            ) {
-                                                AlertUtils.showSuccess(
-                                                    "Order cancelled successfully."
-                                                );
-                                                orderList
+                                                    " hour(s) remaining to cancel.")) {
+                                        if (orderDAO.cancelOrder(
+                                                order.getId())) {
+                                            AlertUtils.showSuccess(
+                                                    "Order cancelled successfully.");
+                                            orderList
                                                     .getItems()
                                                     .remove(order);
-                                            } else {
-                                                AlertUtils.showError(
+                                        } else {
+                                            AlertUtils.showError(
                                                     "Cannot Cancel",
-                                                    "Order cannot be cancelled. The 24-hour cancellation window has expired."
-                                                );
-                                            }
+                                                    "Order cannot be cancelled. The 24-hour cancellation window has expired.");
                                         }
-                                    });
-                                    actions.getChildren().add(cancelBtn);
-                                } else {
-                                    Label expiredLabel = new Label(
-                                        "Cancellation expired"
-                                    );
-                                    expiredLabel.setStyle(
-                                        "-fx-text-fill: #999; -fx-font-size: 10px;"
-                                    );
-                                    actions.getChildren().add(expiredLabel);
-                                }
+                                    }
+                                });
+                                actions.getChildren().add(cancelBtn);
+                            } else {
+                                Label expiredLabel = new Label(
+                                        "Cancellation expired");
+                                expiredLabel.setStyle(
+                                        "-fx-text-fill: #999; -fx-font-size: 10px;");
+                                actions.getChildren().add(expiredLabel);
                             }
+                        }
 
-                            // Rate button (only for delivered orders)
-                            if (
-                                order.isDelivered() && order.getCarrierId() > 0
-                            ) {
-                                if (
-                                    !ratingDAO.hasRated(
-                                        order.getId(),
-                                        currentUser.getId()
-                                    )
-                                ) {
-                                    Button rateBtn = new Button("Rate Carrier");
-                                    rateBtn.setOnAction(e ->
-                                        rateCarrier(order)
-                                    );
-                                    actions.getChildren().add(rateBtn);
-                                }
+                        // Rate button (only for delivered orders)
+                        if (order.isDelivered() && order.getCarrierId() > 0) {
+                            if (!ratingDAO.hasRated(
+                                    order.getId(),
+                                    currentUser.getId())) {
+                                Button rateBtn = new Button("Rate Carrier");
+                                rateBtn.setOnAction(e -> rateCarrier(order));
+                                actions.getChildren().add(rateBtn);
                             }
+                        }
 
-                            cell
+                        cell
                                 .getChildren()
                                 .addAll(
-                                    idLabel,
-                                    dateLabel,
-                                    totalLabel,
-                                    actions
-                                );
-                            setGraphic(cell);
-                        }
+                                        idLabel,
+                                        dateLabel,
+                                        totalLabel,
+                                        actions);
+                        setGraphic(cell);
                     }
                 }
-            );
+            });
 
             content.getChildren().add(orderList);
             VBox.setVgrow(orderList, Priority.ALWAYS);
@@ -722,47 +715,38 @@ public class CustomerController {
 
         Button savePdfBtn = new Button("Save PDF Invoice");
         savePdfBtn.setStyle(
-            "-fx-background-color: #3498db; -fx-text-fill: white;"
-        );
+                "-fx-background-color: #3498db; -fx-text-fill: white;");
 
         final Order orderFinal = order;
         savePdfBtn.setOnAction(e -> {
-            javafx.stage.FileChooser fileChooser =
-                new javafx.stage.FileChooser();
+            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
             fileChooser.setTitle("Save Invoice as PDF");
             fileChooser.setInitialFileName(
-                "Invoice_" + orderFinal.getId() + ".pdf"
-            );
+                    "Invoice_" + orderFinal.getId() + ".pdf");
             fileChooser
-                .getExtensionFilters()
-                .add(
-                    new javafx.stage.FileChooser.ExtensionFilter(
-                        "PDF Files",
-                        "*.pdf"
-                    )
-                );
+                    .getExtensionFilters()
+                    .add(
+                            new javafx.stage.FileChooser.ExtensionFilter(
+                                    "PDF Files",
+                                    "*.pdf"));
 
             java.io.File file = fileChooser.showSaveDialog(
-                alert.getDialogPane().getScene().getWindow()
-            );
+                    alert.getDialogPane().getScene().getWindow());
             if (file != null) {
                 try {
                     byte[] pdfData = orderFinal.getInvoicePdf();
                     if (pdfData == null || pdfData.length == 0) {
                         // Generate PDF if not stored
                         pdfData = PdfInvoiceGenerator.generatePdfFromOrder(
-                            orderFinal
-                        );
+                                orderFinal);
                     }
                     java.nio.file.Files.write(file.toPath(), pdfData);
                     AlertUtils.showSuccess(
-                        "PDF saved successfully to:\n" + file.getAbsolutePath()
-                    );
+                            "PDF saved successfully to:\n" + file.getAbsolutePath());
                 } catch (Exception ex) {
                     AlertUtils.showError(
-                        "Save Failed",
-                        "Could not save PDF: " + ex.getMessage()
-                    );
+                            "Save Failed",
+                            "Could not save PDF: " + ex.getMessage());
                 }
             }
         });
@@ -780,8 +764,7 @@ public class CustomerController {
         Dialog<Rating> dialog = new Dialog<>();
         dialog.setTitle("Rate Carrier");
         dialog.setHeaderText(
-            "Rate your delivery experience for Order #" + order.getId()
-        );
+                "Rate your delivery experience for Order #" + order.getId());
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -798,24 +781,23 @@ public class CustomerController {
         commentArea.setPrefRowCount(3);
 
         content
-            .getChildren()
-            .addAll(ratingLabel, ratingCombo, commentLabel, commentArea);
+                .getChildren()
+                .addAll(ratingLabel, ratingCombo, commentLabel, commentArea);
 
         dialog.getDialogPane().setContent(content);
         dialog
-            .getDialogPane()
-            .getButtonTypes()
-            .addAll(ButtonType.OK, ButtonType.CANCEL);
+                .getDialogPane()
+                .getButtonTypes()
+                .addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 return new Rating(
-                    order.getId(),
-                    order.getCarrierId(),
-                    currentUser.getId(),
-                    ratingCombo.getValue(),
-                    commentArea.getText()
-                );
+                        order.getId(),
+                        order.getCarrierId(),
+                        currentUser.getId(),
+                        ratingCombo.getValue(),
+                        commentArea.getText());
             }
             return null;
         });
@@ -866,9 +848,9 @@ public class CustomerController {
 
         dialog.getDialogPane().setContent(grid);
         dialog
-            .getDialogPane()
-            .getButtonTypes()
-            .addAll(ButtonType.OK, ButtonType.CANCEL);
+                .getDialogPane()
+                .getButtonTypes()
+                .addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
@@ -933,22 +915,18 @@ public class CustomerController {
 
         Button sendBtn = new Button("Send Message");
         sendBtn.setOnAction(e -> {
-            if (
-                subjectField.getText().trim().isEmpty() ||
-                messageField.getText().trim().isEmpty()
-            ) {
+            if (subjectField.getText().trim().isEmpty() ||
+                    messageField.getText().trim().isEmpty()) {
                 AlertUtils.showValidationError(
-                    "Please enter both subject and message."
-                );
+                        "Please enter both subject and message.");
                 return;
             }
 
             Message msg = new Message(
-                currentUser.getId(),
-                owner.getId(),
-                subjectField.getText().trim(),
-                messageField.getText().trim()
-            );
+                    currentUser.getId(),
+                    owner.getId(),
+                    subjectField.getText().trim(),
+                    messageField.getText().trim());
 
             if (messageDAO.send(msg)) {
                 AlertUtils.showSuccess("Message sent successfully!");
@@ -957,21 +935,20 @@ public class CustomerController {
                 // Refresh message list
                 messageList.getItems().clear();
                 messageList
-                    .getItems()
-                    .addAll(messageDAO.findBySender(currentUser.getId()));
+                        .getItems()
+                        .addAll(messageDAO.findBySender(currentUser.getId()));
             }
         });
 
         sendContent
-            .getChildren()
-            .addAll(
-                new Label("To: Store Owner"),
-                new Label("Subject:"),
-                subjectField,
-                new Label("Message:"),
-                messageField,
-                sendBtn
-            );
+                .getChildren()
+                .addAll(
+                        new Label("To: Store Owner"),
+                        new Label("Subject:"),
+                        subjectField,
+                        new Label("Message:"),
+                        messageField,
+                        sendBtn);
         sendTab.setContent(sendContent);
 
         // View Messages Tab
@@ -980,27 +957,24 @@ public class CustomerController {
 
         VBox viewContent = new VBox(10);
         viewContent.setPadding(new Insets(15));
-        messageList.setCellFactory(lv ->
-            new ListCell<Message>() {
-                @Override
-                protected void updateItem(Message msg, boolean empty) {
-                    super.updateItem(msg, empty);
-                    if (empty || msg == null) {
-                        setText(null);
-                    } else {
-                        String text =
-                            msg.getSubject() +
+        messageList.setCellFactory(lv -> new ListCell<Message>() {
+            @Override
+            protected void updateItem(Message msg, boolean empty) {
+                super.updateItem(msg, empty);
+                if (empty || msg == null) {
+                    setText(null);
+                } else {
+                    String text = msg.getSubject() +
                             "\n" +
                             "Sent: " +
                             msg.getSentAt().toString();
-                        if (msg.hasReply()) {
-                            text += "\n> Reply: " + msg.getReply();
-                        }
-                        setText(text);
+                    if (msg.hasReply()) {
+                        text += "\n> Reply: " + msg.getReply();
                     }
+                    setText(text);
                 }
             }
-        );
+        });
 
         viewContent.getChildren().add(messageList);
         VBox.setVgrow(messageList, Priority.ALWAYS);
@@ -1019,12 +993,9 @@ public class CustomerController {
     @FXML
     private void handleLogout(ActionEvent event) {
         if (!cartManager.isEmpty()) {
-            if (
-                !AlertUtils.showConfirmation(
+            if (!AlertUtils.showConfirmation(
                     "Logout",
-                    "You have items in your cart. Are you sure you want to logout?"
-                )
-            ) {
+                    "You have items in your cart. Are you sure you want to logout?")) {
                 return;
             }
         }
@@ -1036,10 +1007,9 @@ public class CustomerController {
         // Navigate to login
         Stage stage = (Stage) usernameLabel.getScene().getWindow();
         SceneNavigator.loadScene(
-            stage,
-            "Login.fxml",
-            "Group17 GreenGrocer - Login"
-        );
+                stage,
+                "Login.fxml",
+                "Group17 GreenGrocer - Login");
     }
 
     /**
