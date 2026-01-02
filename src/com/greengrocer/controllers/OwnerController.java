@@ -151,6 +151,9 @@ public class OwnerController {
     private TableColumn<Coupon, String> coupActiveColumn;
 
     @FXML
+    private TableColumn<Coupon, String> coupUsageColumn;
+
+    @FXML
     private TableColumn<Coupon, String> coupStatusColumn;
 
     @FXML
@@ -187,6 +190,21 @@ public class OwnerController {
 
     @FXML
     private PieChart productDistributionChart;
+
+    @FXML
+    private Label totalRevenueLabel;
+
+    @FXML
+    private Label totalOrdersLabel;
+
+    @FXML
+    private Label avgOrderValueLabel;
+
+    @FXML
+    private Label pendingOrdersLabel;
+
+    @FXML
+    private Label bestSellingLabel;
 
     // General
     @FXML
@@ -965,6 +983,19 @@ public class OwnerController {
             new SimpleStringProperty(data.getValue().isActive() ? "Yes" : "No")
         );
 
+        // Usage column shows usage statistics
+        coupUsageColumn.setCellValueFactory(data -> {
+            Coupon coupon = data.getValue();
+            String usageText;
+            if (coupon.getMaxUsage() == 0) {
+                usageText = coupon.getUsageCount() + " / Unlimited";
+            } else {
+                usageText =
+                    coupon.getUsageCount() + " / " + coupon.getMaxUsage();
+            }
+            return new SimpleStringProperty(usageText);
+        });
+
         // Status column shows overall coupon status
         coupStatusColumn.setCellValueFactory(data -> {
             Coupon coupon = data.getValue();
@@ -976,6 +1007,8 @@ public class OwnerController {
                 coupon.getExpiryDate().isBefore(java.time.LocalDate.now())
             ) {
                 status = "Expired";
+            } else if (coupon.isUsageLimitReached()) {
+                status = "Usage Limit Reached";
             } else {
                 status = "Active";
             }
@@ -1011,6 +1044,7 @@ public class OwnerController {
         TextField codeField = new TextField();
         TextField discountField = new TextField();
         TextField minOrderField = new TextField("0");
+        TextField maxUsageField = new TextField("0");
         DatePicker expiryPicker = new DatePicker();
 
         grid.add(new Label("Code:"), 0, 0);
@@ -1019,8 +1053,10 @@ public class OwnerController {
         grid.add(discountField, 1, 1);
         grid.add(new Label("Min Order Value:"), 0, 2);
         grid.add(minOrderField, 1, 2);
-        grid.add(new Label("Expiry Date:"), 0, 3);
-        grid.add(expiryPicker, 1, 3);
+        grid.add(new Label("Max Usage (0=unlimited):"), 0, 3);
+        grid.add(maxUsageField, 1, 3);
+        grid.add(new Label("Expiry Date:"), 0, 4);
+        grid.add(expiryPicker, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
         dialog
@@ -1050,12 +1086,22 @@ public class OwnerController {
                     minOrderField.getText()
                 );
 
+                int maxUsage = ValidationUtils.parseInt(
+                    maxUsageField.getText()
+                );
+                if (maxUsage < 0) {
+                    AlertUtils.showValidationError(
+                        "Max usage cannot be negative. Use 0 for unlimited."
+                    );
+                    return null;
+                }
+
                 Coupon coupon = new Coupon();
                 coupon.setCode(code);
                 coupon.setDiscountPercent(discount);
                 coupon.setMinOrderValue(minOrder);
+                coupon.setMaxUsage(maxUsage);
                 coupon.setExpiryDate(expiryPicker.getValue());
-                coupon.setActive(true);
                 return coupon;
             }
             return null;
@@ -1191,7 +1237,63 @@ public class OwnerController {
 
     // ======================== REPORTS TAB ========================
 
+    private void loadStatistics() {
+        // Total Revenue
+        double totalRevenue = orderDAO.getTotalSales();
+        totalRevenueLabel.setText(String.format("$%.2f", totalRevenue));
+
+        // Total Orders (all statuses)
+        List<Order> allOrders = orderDAO.findAll();
+        totalOrdersLabel.setText(String.valueOf(allOrders.size()));
+
+        // Average Order Value
+        int deliveredCount = 0;
+        for (Order order : allOrders) {
+            if (order.isDelivered()) {
+                deliveredCount++;
+            }
+        }
+        double avgOrderValue = deliveredCount > 0
+            ? totalRevenue / deliveredCount
+            : 0;
+        avgOrderValueLabel.setText(String.format("$%.2f", avgOrderValue));
+
+        // Pending Orders
+        int pendingCount = 0;
+        for (Order order : allOrders) {
+            if (order.isPending()) {
+                pendingCount++;
+            }
+        }
+        pendingOrdersLabel.setText(String.valueOf(pendingCount));
+
+        // Best Selling Product
+        try {
+            ResultSet rs = orderDAO.getSalesByProduct();
+            if (rs != null && rs.next()) {
+                String bestProduct = rs.getString("product_name");
+                double quantity = rs.getDouble("total_quantity");
+                double sales = rs.getDouble("total_sales");
+                bestSellingLabel.setText(
+                    String.format(
+                        "%s (%.1f kg sold, $%.2f revenue)",
+                        bestProduct,
+                        quantity,
+                        sales
+                    )
+                );
+            } else {
+                bestSellingLabel.setText("No sales data yet");
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading best seller: " + e.getMessage());
+            bestSellingLabel.setText("Error loading data");
+        }
+    }
+
     private void loadCharts() {
+        // Load statistics first
+        loadStatistics();
         // Sales by Product Bar Chart
         productSalesChart.getData().clear();
         XYChart.Series<String, Number> salesSeries = new XYChart.Series<>();

@@ -171,6 +171,7 @@
                             <TableColumn fx:id="coupCodeColumn" text="Code" prefWidth="120"/>
                             <TableColumn fx:id="coupDiscountColumn" text="Discount %" prefWidth="80"/>
                             <TableColumn fx:id="coupMinColumn" text="Min Order" prefWidth="80"/>
+                            <TableColumn fx:id="coupUsageColumn" text="Usage" prefWidth="100"/>
                             <TableColumn fx:id="coupExpiryColumn" text="Expiry Date" prefWidth="100"/>
                             <TableColumn fx:id="coupActiveColumn" text="Active" prefWidth="60"/>
                             <TableColumn fx:id="coupStatusColumn" text="Status" prefWidth="80"/>
@@ -225,6 +226,30 @@
                     <HBox spacing="15">
                         <Button text="Refresh Charts" onAction="#handleRefreshCharts" styleClass="primary-button"/>
                     </HBox>
+
+                    <!-- Statistics Summary -->
+                    <GridPane hgap="20" vgap="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+
+                        <Label text="Total Revenue:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="totalRevenueLabel" text="$0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Total Orders:" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-value" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                        <Label text="Average Order Value:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="avgOrderValueLabel" text="$0.00" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Pending Orders:" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <Label fx:id="pendingOrdersLabel" text="0" styleClass="stat-value" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+                        <Label text="Best Selling Product:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="bestSellingLabel" text="-" styleClass="stat-value" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="3"/>
+                    </GridPane>
+
+                    <Separator/>
 
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
                         <!-- Sales by Product Chart -->

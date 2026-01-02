@@ -3,6 +3,10 @@ package com.greengrocer.controllers;
 import com.greengrocer.database.*;
 import com.greengrocer.models.*;
 import com.greengrocer.utils.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -15,15 +19,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 
 /**
  * Controller for the Shopping Cart window.
  * Handles cart management, checkout, and order creation.
- * 
+ *
  * @author Group17
  * @version 1.0
  */
@@ -31,49 +31,70 @@ public class ShoppingCartController {
 
     @FXML
     private TableView<CartItem> cartTable;
+
     @FXML
     private TableColumn<CartItem, Void> imageColumn;
+
     @FXML
     private TableColumn<CartItem, String> productColumn;
+
     @FXML
     private TableColumn<CartItem, Double> quantityColumn;
+
     @FXML
     private TableColumn<CartItem, Double> priceColumn;
+
     @FXML
     private TableColumn<CartItem, Double> totalColumn;
+
     @FXML
     private TableColumn<CartItem, Void> actionColumn;
 
     @FXML
     private Label subtotalLabel;
+
     @FXML
     private Label vatLabel;
+
     @FXML
     private Label totalLabel;
+
     @FXML
     private HBox discountRow;
+
     @FXML
     private Label discountLabel;
+
     @FXML
     private Label discountValueLabel;
+
     @FXML
     private Label minimumWarning;
+
     @FXML
     private ComboBox<Coupon> couponCombo;
+
     @FXML
     private DatePicker deliveryDatePicker;
+
     @FXML
     private ComboBox<String> deliveryTimeCombo;
+
     @FXML
     private Button checkoutButton;
+
     @FXML
     private VBox couponSection;
+
     @FXML
     private Button removeCouponBtn;
+
     @FXML
     private VBox loyaltySection;
+
     @FXML
     private ComboBox<String> loyaltyCombo;
+
     @FXML
     private Label loyaltyCalcLabel;
 
@@ -84,6 +105,7 @@ public class ShoppingCartController {
     private CouponDAO couponDAO;
     private LoyaltySettingsDAO loyaltySettingsDAO;
     private User currentUser;
+
     /** Reference to parent controller - kept for potential future use */
     @SuppressWarnings("unused")
     private CustomerController parentController;
@@ -92,6 +114,7 @@ public class ShoppingCartController {
     private double loyaltyDiscountPercent = 0;
     private Coupon appliedCoupon = null;
     private LoyaltySettings loyaltySettings;
+
     /**
      * Tracks if user is eligible for loyalty discount - kept for potential future
      * use
@@ -103,8 +126,7 @@ public class ShoppingCartController {
      * Default constructor for ShoppingCartController.
      * Called by JavaFX when loading the FXML file.
      */
-    public ShoppingCartController() {
-    }
+    public ShoppingCartController() {}
 
     /**
      * Initializes the controller.
@@ -124,7 +146,9 @@ public class ShoppingCartController {
         cartTable.setFixedCellSize(50);
 
         // Make columns fill the table width (no empty space on right)
-        cartTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        cartTable.setColumnResizePolicy(
+            TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS
+        );
 
         setupTableColumns();
         setupDeliveryOptions();
@@ -140,78 +164,101 @@ public class ShoppingCartController {
      */
     private void setupTableColumns() {
         // Image column
-        imageColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
-            private final ImageView imageView = new ImageView();
+        imageColumn.setCellFactory(col ->
+            new TableCell<CartItem, Void>() {
+                private final ImageView imageView = new ImageView();
 
-            {
-                imageView.setFitWidth(40);
-                imageView.setFitHeight(40);
-                imageView.setPreserveRatio(true);
-            }
+                {
+                    imageView.setFitWidth(40);
+                    imageView.setFitHeight(40);
+                    imageView.setPreserveRatio(true);
+                }
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    CartItem cartItem = getTableView().getItems().get(getIndex());
-                    loadProductImage(imageView, cartItem.getProductName());
-                    setGraphic(imageView);
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        CartItem cartItem = getTableView()
+                            .getItems()
+                            .get(getIndex());
+                        loadProductImage(imageView, cartItem.getProductName());
+                        setGraphic(imageView);
+                    }
                 }
             }
-        });
+        );
 
-        productColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getProductName()));
+        productColumn.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getProductName())
+        );
 
-        quantityColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getQuantity()).asObject());
+        quantityColumn.setCellValueFactory(data ->
+            new SimpleDoubleProperty(data.getValue().getQuantity()).asObject()
+        );
 
-        priceColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPriceAtTime()).asObject());
-        priceColumn.setCellFactory(col -> new TableCell<CartItem, Double>() {
-            @Override
-            protected void updateItem(Double price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", price));
+        priceColumn.setCellValueFactory(data ->
+            new SimpleDoubleProperty(
+                data.getValue().getPriceAtTime()
+            ).asObject()
+        );
+        priceColumn.setCellFactory(col ->
+            new TableCell<CartItem, Double>() {
+                @Override
+                protected void updateItem(Double price, boolean empty) {
+                    super.updateItem(price, empty);
+                    if (empty || price == null) {
+                        setText(null);
+                    } else {
+                        setText(String.format("$%.2f", price));
+                    }
                 }
             }
-        });
+        );
 
-        totalColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTotalPrice()).asObject());
-        totalColumn.setCellFactory(col -> new TableCell<CartItem, Double>() {
-            @Override
-            protected void updateItem(Double total, boolean empty) {
-                super.updateItem(total, empty);
-                if (empty || total == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", total));
+        totalColumn.setCellValueFactory(data ->
+            new SimpleDoubleProperty(data.getValue().getTotalPrice()).asObject()
+        );
+        totalColumn.setCellFactory(col ->
+            new TableCell<CartItem, Double>() {
+                @Override
+                protected void updateItem(Double total, boolean empty) {
+                    super.updateItem(total, empty);
+                    if (empty || total == null) {
+                        setText(null);
+                    } else {
+                        setText(String.format("$%.2f", total));
+                    }
                 }
             }
-        });
+        );
 
         // Action column with compact remove button
-        actionColumn.setCellFactory(col -> new TableCell<CartItem, Void>() {
-            private final Button removeBtn = new Button("✕");
+        actionColumn.setCellFactory(col ->
+            new TableCell<CartItem, Void>() {
+                private final Button removeBtn = new Button("✕");
 
-            {
-                removeBtn.setStyle(
-                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 2 6 2 6;");
-                removeBtn.setOnAction(e -> {
-                    CartItem item = getTableView().getItems().get(getIndex());
-                    cartManager.removeItem(item.getProductId());
-                    refreshCart();
-                });
-            }
+                {
+                    removeBtn.setStyle(
+                        "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 2 6 2 6;"
+                    );
+                    removeBtn.setOnAction(e -> {
+                        CartItem item = getTableView()
+                            .getItems()
+                            .get(getIndex());
+                        cartManager.removeItem(item.getProductId());
+                        refreshCart();
+                    });
+                }
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : removeBtn);
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setGraphic(empty ? null : removeBtn);
+                }
             }
-        });
+        );
     }
 
     /**
@@ -223,7 +270,11 @@ public class ShoppingCartController {
 
         for (String ext : extensions) {
             try {
-                Image image = new Image(getClass().getResourceAsStream("/com/greengrocer/images/" + baseName + ext));
+                Image image = new Image(
+                    getClass().getResourceAsStream(
+                        "/com/greengrocer/images/" + baseName + ext
+                    )
+                );
                 if (image != null && !image.isError()) {
                     imageView.setImage(image);
                     return;
@@ -242,15 +293,19 @@ public class ShoppingCartController {
     private void setupDeliveryOptions() {
         // Date picker - only allow next 2 days
         LocalDate today = LocalDate.now();
-        deliveryDatePicker.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                // Only allow dates within next 48 hours
-                LocalDate maxDate = today.plusDays(2);
-                setDisable(empty || date.isBefore(today) || date.isAfter(maxDate));
+        deliveryDatePicker.setDayCellFactory(picker ->
+            new DateCell() {
+                @Override
+                public void updateItem(LocalDate date, boolean empty) {
+                    super.updateItem(date, empty);
+                    // Only allow dates within next 48 hours
+                    LocalDate maxDate = today.plusDays(2);
+                    setDisable(
+                        empty || date.isBefore(today) || date.isAfter(maxDate)
+                    );
+                }
             }
-        });
+        );
         deliveryDatePicker.setValue(today);
 
         // Time slots
@@ -268,10 +323,21 @@ public class ShoppingCartController {
      */
     private void loadCoupons() {
         List<Coupon> coupons = couponDAO.findUserCoupons(currentUser.getId());
-        System.out.println("DEBUG: Loading coupons for user ID: " + currentUser.getId()
-                + ", found " + coupons.size() + " coupons");
+        System.out.println(
+            "DEBUG: Loading coupons for user ID: " +
+                currentUser.getId() +
+                ", found " +
+                coupons.size() +
+                " coupons"
+        );
         for (Coupon c : coupons) {
-            System.out.println("DEBUG: Coupon found: " + c.getCode() + " - " + c.getDiscountPercent() + "%");
+            System.out.println(
+                "DEBUG: Coupon found: " +
+                    c.getCode() +
+                    " - " +
+                    c.getDiscountPercent() +
+                    "%"
+            );
         }
         couponCombo.getItems().clear();
         couponCombo.getItems().addAll(coupons);
@@ -305,23 +371,45 @@ public class ShoppingCartController {
             loyaltyEligible = true;
             // User is eligible - show discount options
             loyaltyCombo.getItems().add("No discount");
-            loyaltyCombo.getItems()
-                    .add(String.format("Loyalty Discount: %.0f%% off", loyaltySettings.getDiscountPercent()));
+            loyaltyCombo
+                .getItems()
+                .add(
+                    String.format(
+                        "Loyalty Discount: %.0f%% off",
+                        loyaltySettings.getDiscountPercent()
+                    )
+                );
             loyaltyCombo.setValue("No discount");
-            loyaltyCalcLabel
-                    .setText(String.format("🎉 You have %d completed orders - discount unlocked!", completedOrders));
+            loyaltyCalcLabel.setText(
+                String.format(
+                    "🎉 You have %d completed orders - discount unlocked!",
+                    completedOrders
+                )
+            );
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         } else {
             // User not eligible yet - show progress
             loyaltyEligible = false;
             int remaining = requiredOrders - completedOrders;
-            loyaltyCombo.getItems().add(String.format("Complete %d more order(s) to unlock %.0f%% off", remaining,
-                    loyaltySettings.getDiscountPercent()));
+            loyaltyCombo
+                .getItems()
+                .add(
+                    String.format(
+                        "Complete %d more order(s) to unlock %.0f%% off",
+                        remaining,
+                        loyaltySettings.getDiscountPercent()
+                    )
+                );
             loyaltyCombo.setValue(loyaltyCombo.getItems().get(0));
             loyaltyCombo.setDisable(true);
-            loyaltyCalcLabel
-                    .setText(String.format("Progress: %d/%d orders completed", completedOrders, requiredOrders));
+            loyaltyCalcLabel.setText(
+                String.format(
+                    "Progress: %d/%d orders completed",
+                    completedOrders,
+                    requiredOrders
+                )
+            );
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
@@ -346,17 +434,29 @@ public class ShoppingCartController {
             double newPrice = subtotal - discountAmount;
 
             // Show calculation
-            loyaltyCalcLabel.setText(String.format(
+            loyaltyCalcLabel.setText(
+                String.format(
                     "Subtotal: $%.2f - %.0f%% = $%.2f (Save $%.2f)",
-                    subtotal, loyaltyDiscountPercent, newPrice, discountAmount));
+                    subtotal,
+                    loyaltyDiscountPercent,
+                    newPrice,
+                    discountAmount
+                )
+            );
             loyaltyCalcLabel.setVisible(true);
             loyaltyCalcLabel.setManaged(true);
         }
         // Recalculate total discount
-        appliedDiscountPercent = loyaltyDiscountPercent
-                + (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
+        appliedDiscountPercent =
+            loyaltyDiscountPercent +
+            (appliedCoupon != null ? appliedCoupon.getDiscountPercent() : 0);
         if (appliedDiscountPercent > 0) {
-            discountLabel.setText(String.format("Total Discount (%.0f%%):", appliedDiscountPercent));
+            discountLabel.setText(
+                String.format(
+                    "Total Discount (%.0f%%):",
+                    appliedDiscountPercent
+                )
+            );
             discountRow.setVisible(true);
             discountRow.setManaged(true);
         } else {
@@ -403,9 +503,15 @@ public class ShoppingCartController {
      */
     private void checkMinimum() {
         if (!cartManager.meetsMinimum()) {
-            double needed = CartManager.MINIMUM_CART_VALUE - cartManager.getSubtotal();
-            minimumWarning.setText(String.format("Minimum order: $%.2f. Add $%.2f more.",
-                    CartManager.MINIMUM_CART_VALUE, needed));
+            double needed =
+                CartManager.MINIMUM_CART_VALUE - cartManager.getSubtotal();
+            minimumWarning.setText(
+                String.format(
+                    "Minimum order: $%.2f. Add $%.2f more.",
+                    CartManager.MINIMUM_CART_VALUE,
+                    needed
+                )
+            );
             minimumWarning.setVisible(true);
             minimumWarning.setManaged(true);
             checkoutButton.setDisable(true);
@@ -423,21 +529,39 @@ public class ShoppingCartController {
     private void handleApplyCoupon(ActionEvent event) {
         Coupon selected = couponCombo.getValue();
         if (selected == null) {
-            AlertUtils.showWarning("No Coupon", "Please select a coupon to apply.");
+            AlertUtils.showWarning(
+                "No Coupon",
+                "Please select a coupon to apply."
+            );
+            return;
+        }
+
+        if (!selected.isValid()) {
+            AlertUtils.showWarning(
+                "Cannot Apply",
+                "This coupon is no longer valid. It may have expired or reached its usage limit."
+            );
             return;
         }
 
         if (!selected.meetsMinimum(cartManager.getSubtotal())) {
-            AlertUtils.showWarning("Cannot Apply",
-                    String.format("Minimum order value of $%.2f required for this coupon.",
-                            selected.getMinOrderValue()));
+            AlertUtils.showWarning(
+                "Cannot Apply",
+                String.format(
+                    "Minimum order value of $%.2f required for this coupon.",
+                    selected.getMinOrderValue()
+                )
+            );
             return;
         }
 
         // Add coupon discount to existing loyalty discount
         appliedCoupon = selected;
-        appliedDiscountPercent = loyaltyDiscountPercent + selected.getDiscountPercent();
-        discountLabel.setText(String.format("Discount (%.0f%%):", appliedDiscountPercent));
+        appliedDiscountPercent =
+            loyaltyDiscountPercent + selected.getDiscountPercent();
+        discountLabel.setText(
+            String.format("Discount (%.0f%%):", appliedDiscountPercent)
+        );
         discountRow.setVisible(true);
 
         couponCombo.setDisable(true);
@@ -445,7 +569,9 @@ public class ShoppingCartController {
         removeCouponBtn.setManaged(true);
         updateTotals();
 
-        AlertUtils.showSuccess("Coupon applied: " + selected.getDiscountPercent() + "% off!");
+        AlertUtils.showSuccess(
+            "Coupon applied: " + selected.getDiscountPercent() + "% off!"
+        );
     }
 
     /**
@@ -465,7 +591,9 @@ public class ShoppingCartController {
 
         // Update discount display
         if (appliedDiscountPercent > 0) {
-            discountLabel.setText(String.format("Discount (%.0f%%):", appliedDiscountPercent));
+            discountLabel.setText(
+                String.format("Discount (%.0f%%):", appliedDiscountPercent)
+            );
             discountRow.setVisible(true);
             discountRow.setManaged(true);
         } else {
@@ -482,7 +610,12 @@ public class ShoppingCartController {
      */
     @FXML
     private void handleClearCart(ActionEvent event) {
-        if (AlertUtils.showConfirmation("Clear Cart", "Remove all items from cart?")) {
+        if (
+            AlertUtils.showConfirmation(
+                "Clear Cart",
+                "Remove all items from cart?"
+            )
+        ) {
             cartManager.clear();
             refreshCart();
         }
@@ -503,13 +636,21 @@ public class ShoppingCartController {
     @FXML
     private void handleCheckout(ActionEvent event) {
         if (cartManager.isEmpty()) {
-            AlertUtils.showWarning("Empty Cart", "Please add items to your cart before checkout.");
+            AlertUtils.showWarning(
+                "Empty Cart",
+                "Please add items to your cart before checkout."
+            );
             return;
         }
 
         if (!cartManager.meetsMinimum()) {
-            AlertUtils.showWarning("Minimum Not Met",
-                    String.format("Minimum order value is $%.2f", CartManager.MINIMUM_CART_VALUE));
+            AlertUtils.showWarning(
+                "Minimum Not Met",
+                String.format(
+                    "Minimum order value is $%.2f",
+                    CartManager.MINIMUM_CART_VALUE
+                )
+            );
             return;
         }
 
@@ -518,26 +659,42 @@ public class ShoppingCartController {
         String deliveryTime = deliveryTimeCombo.getValue();
 
         if (deliveryDate == null || deliveryTime == null) {
-            AlertUtils.showValidationError("Please select a delivery date and time.");
+            AlertUtils.showValidationError(
+                "Please select a delivery date and time."
+            );
             return;
         }
 
         // Parse delivery datetime
         String[] timeParts = deliveryTime.split(":");
-        LocalTime time = LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1]));
+        LocalTime time = LocalTime.of(
+            Integer.parseInt(timeParts[0]),
+            Integer.parseInt(timeParts[1])
+        );
         LocalDateTime requestedDelivery = LocalDateTime.of(deliveryDate, time);
 
         // Validate within 48 hours
         if (requestedDelivery.isAfter(LocalDateTime.now().plusHours(48))) {
-            AlertUtils.showValidationError("Delivery must be within 48 hours from now.");
+            AlertUtils.showValidationError(
+                "Delivery must be within 48 hours from now."
+            );
             return;
         }
 
         // Verify stock one more time
         for (CartItem item : cartManager.getItems()) {
-            if (!productDAO.hasEnoughStock(item.getProductId(), item.getQuantity())) {
-                AlertUtils.showError("Stock Issue",
-                        "Sorry, " + item.getProductName() + " no longer has sufficient stock.");
+            if (
+                !productDAO.hasEnoughStock(
+                    item.getProductId(),
+                    item.getQuantity()
+                )
+            ) {
+                AlertUtils.showError(
+                    "Stock Issue",
+                    "Sorry, " +
+                        item.getProductName() +
+                        " no longer has sufficient stock."
+                );
                 return;
             }
         }
@@ -565,19 +722,32 @@ public class ShoppingCartController {
 
         // Add items to order
         for (CartItem cartItem : cartManager.getItems()) {
-            OrderItem orderItem = new OrderItem(0, cartItem.getProductId(),
-                    cartItem.getProductName(), cartItem.getQuantity(), cartItem.getPriceAtTime());
+            OrderItem orderItem = new OrderItem(
+                0,
+                cartItem.getProductId(),
+                cartItem.getProductName(),
+                cartItem.getQuantity(),
+                cartItem.getPriceAtTime()
+            );
             order.addItem(orderItem);
         }
 
         // Generate text invoice
-        String invoice = InvoiceGenerator.generateInvoice(order, currentUser,
-                cartManager.getItems(), appliedDiscountPercent);
+        String invoice = InvoiceGenerator.generateInvoice(
+            order,
+            currentUser,
+            cartManager.getItems(),
+            appliedDiscountPercent
+        );
         order.setInvoice(invoice);
 
         // Generate PDF invoice
-        byte[] pdfInvoice = PdfInvoiceGenerator.generatePdfInvoice(order, currentUser,
-                cartManager.getItems(), appliedDiscountPercent);
+        byte[] pdfInvoice = PdfInvoiceGenerator.generatePdfInvoice(
+            order,
+            currentUser,
+            cartManager.getItems(),
+            appliedDiscountPercent
+        );
         order.setInvoicePdf(pdfInvoice);
 
         // Save order
@@ -591,7 +761,10 @@ public class ShoppingCartController {
 
             // Mark coupon as used if applied
             if (appliedCoupon != null) {
-                couponDAO.markCouponUsed(currentUser.getId(), appliedCoupon.getId());
+                couponDAO.markCouponUsed(
+                    currentUser.getId(),
+                    appliedCoupon.getId()
+                );
             }
 
             // Increment user's completed orders for loyalty discount eligibility
@@ -607,7 +780,10 @@ public class ShoppingCartController {
             Stage stage = (Stage) cartTable.getScene().getWindow();
             stage.close();
         } else {
-            AlertUtils.showError("Order Failed", "Could not create order. Please try again.");
+            AlertUtils.showError(
+                "Order Failed",
+                "Could not create order. Please try again."
+            );
         }
     }
 
@@ -619,22 +795,47 @@ public class ShoppingCartController {
         summary.append("ORDER SUMMARY\n\n");
 
         for (CartItem item : cartManager.getItems()) {
-            summary.append(String.format("%s: %.2f kg @ $%.2f = $%.2f\n",
-                    item.getProductName(), item.getQuantity(),
-                    item.getPriceAtTime(), item.getTotalPrice()));
+            summary.append(
+                String.format(
+                    "%s: %.2f kg @ $%.2f = $%.2f\n",
+                    item.getProductName(),
+                    item.getQuantity(),
+                    item.getPriceAtTime(),
+                    item.getTotalPrice()
+                )
+            );
         }
 
         summary.append("\n─────────────────────────\n");
-        summary.append(String.format("Subtotal: $%.2f\n", cartManager.getSubtotal()));
+        summary.append(
+            String.format("Subtotal: $%.2f\n", cartManager.getSubtotal())
+        );
 
         if (appliedDiscountPercent > 0) {
-            summary.append(String.format("Discount (%.0f%%): -$%.2f\n",
-                    appliedDiscountPercent, cartManager.getDiscountAmount(appliedDiscountPercent)));
+            summary.append(
+                String.format(
+                    "Discount (%.0f%%): -$%.2f\n",
+                    appliedDiscountPercent,
+                    cartManager.getDiscountAmount(appliedDiscountPercent)
+                )
+            );
         }
 
-        double afterDiscount = cartManager.getSubtotal() - cartManager.getDiscountAmount(appliedDiscountPercent);
-        summary.append(String.format("VAT (18%%): $%.2f\n", afterDiscount * CartManager.VAT_RATE));
-        summary.append(String.format("TOTAL: $%.2f\n", afterDiscount + afterDiscount * CartManager.VAT_RATE));
+        double afterDiscount =
+            cartManager.getSubtotal() -
+            cartManager.getDiscountAmount(appliedDiscountPercent);
+        summary.append(
+            String.format(
+                "VAT (18%%): $%.2f\n",
+                afterDiscount * CartManager.VAT_RATE
+            )
+        );
+        summary.append(
+            String.format(
+                "TOTAL: $%.2f\n",
+                afterDiscount + afterDiscount * CartManager.VAT_RATE
+            )
+        );
         summary.append("\nDelivery: ").append(deliveryTime.toString());
 
         return AlertUtils.showConfirmation("Confirm Order", summary.toString());

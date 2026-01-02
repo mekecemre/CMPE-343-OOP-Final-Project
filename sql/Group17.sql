@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS Coupons (
     min_order_value DOUBLE DEFAULT 0,
     expiry_date DATE,
     is_active BOOLEAN DEFAULT TRUE,
+    max_usage INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

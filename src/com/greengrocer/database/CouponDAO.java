@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Data Access Object for Coupon operations.
  * Handles coupon management by owner.
- * 
+ *
  * @author Group17
  * @version 1.0
  */
@@ -26,7 +26,7 @@ public class CouponDAO {
 
     /**
      * Gets all coupons.
-     * 
+     *
      * @return List of all coupons
      */
     public List<Coupon> findAll() {
@@ -48,12 +48,13 @@ public class CouponDAO {
 
     /**
      * Gets all active coupons.
-     * 
+     *
      * @return List of active coupons
      */
     public List<Coupon> findActive() {
         List<Coupon> coupons = new ArrayList<>();
-        String query = "SELECT * FROM Coupons WHERE is_active = TRUE AND (expiry_date IS NULL OR expiry_date >= CURDATE()) ORDER BY discount_percent DESC";
+        String query =
+            "SELECT * FROM Coupons WHERE is_active = TRUE AND (expiry_date IS NULL OR expiry_date >= CURDATE()) ORDER BY discount_percent DESC";
 
         try {
             ResultSet rs = db.executeQuery(query);
@@ -70,7 +71,7 @@ public class CouponDAO {
 
     /**
      * Finds a coupon by code.
-     * 
+     *
      * @param code The coupon code
      * @return Coupon or null if not found
      */
@@ -95,12 +96,13 @@ public class CouponDAO {
 
     /**
      * Creates a new coupon.
-     * 
+     *
      * @param coupon The coupon to create
      * @return true if successful
      */
     public boolean create(Coupon coupon) {
-        String query = "INSERT INTO Coupons (code, discount_percent, min_order_value, expiry_date, is_active) VALUES (?, ?, ?, ?, ?)";
+        String query =
+            "INSERT INTO Coupons (code, discount_percent, min_order_value, expiry_date, is_active, max_usage) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement stmt = db.prepareStatement(query);
@@ -113,24 +115,25 @@ public class CouponDAO {
                 stmt.setNull(4, Types.DATE);
             }
             stmt.setBoolean(5, coupon.isActive());
+            stmt.setInt(6, coupon.getMaxUsage());
 
             int rows = stmt.executeUpdate();
             return rows > 0;
-
         } catch (SQLException e) {
-            System.err.println("Create coupon error: " + e.getMessage());
+            System.err.println("Coupon creation error: " + e.getMessage());
             return false;
         }
     }
 
     /**
      * Updates a coupon.
-     * 
+     *
      * @param coupon The coupon to update
      * @return true if successful
      */
     public boolean update(Coupon coupon) {
-        String query = "UPDATE Coupons SET code = ?, discount_percent = ?, min_order_value = ?, expiry_date = ?, is_active = ? WHERE id = ?";
+        String query =
+            "UPDATE Coupons SET code = ?, discount_percent = ?, min_order_value = ?, expiry_date = ?, is_active = ? WHERE id = ?";
 
         try {
             PreparedStatement stmt = db.prepareStatement(query);
@@ -147,7 +150,6 @@ public class CouponDAO {
 
             int rows = stmt.executeUpdate();
             return rows > 0;
-
         } catch (SQLException e) {
             System.err.println("Update coupon error: " + e.getMessage());
             return false;
@@ -156,7 +158,7 @@ public class CouponDAO {
 
     /**
      * Deletes a coupon.
-     * 
+     *
      * @param couponId The coupon ID
      * @return true if successful
      */
@@ -169,7 +171,6 @@ public class CouponDAO {
 
             int rows = stmt.executeUpdate();
             return rows > 0;
-
         } catch (SQLException e) {
             System.err.println("Delete coupon error: " + e.getMessage());
             return false;
@@ -178,7 +179,7 @@ public class CouponDAO {
 
     /**
      * Deactivates a coupon.
-     * 
+     *
      * @param couponId The coupon ID
      * @return true if successful
      */
@@ -191,7 +192,6 @@ public class CouponDAO {
 
             int rows = stmt.executeUpdate();
             return rows > 0;
-
         } catch (SQLException e) {
             System.err.println("Deactivate coupon error: " + e.getMessage());
             return false;
@@ -200,24 +200,26 @@ public class CouponDAO {
 
     /**
      * Assigns a coupon to a user.
-     * 
+     *
      * @param userId   The user ID
      * @param couponId The coupon ID
      * @return true if successful
      */
     public boolean assignToUser(int userId, int couponId) {
-        String query = "INSERT INTO UserCoupons (user_id, coupon_id) VALUES (?, ?)";
+        String query =
+            "INSERT INTO UserCoupons (user_id, coupon_id) VALUES (?, ?)";
 
         try {
             PreparedStatement stmt = db.prepareStatement(query);
             stmt.setInt(1, userId);
             stmt.setInt(2, couponId);
 
-            System.out.println("DEBUG: Assigning coupon " + couponId + " to user " + userId);
+            System.out.println(
+                "DEBUG: Assigning coupon " + couponId + " to user " + userId
+            );
             int rows = stmt.executeUpdate();
             System.out.println("DEBUG: Rows affected: " + rows);
             return rows > 0;
-
         } catch (SQLException e) {
             System.err.println("Assign coupon error: " + e.getMessage());
             e.printStackTrace();
@@ -227,18 +229,21 @@ public class CouponDAO {
 
     /**
      * Gets coupons available for a user.
-     * 
+     *
      * @param userId The user ID
      * @return List of available coupons for the user
      */
     public List<Coupon> findUserCoupons(int userId) {
         List<Coupon> coupons = new ArrayList<>();
-        String query = "SELECT c.* FROM Coupons c " +
-                "JOIN UserCoupons uc ON c.id = uc.coupon_id " +
-                "WHERE uc.user_id = ? AND uc.is_used = FALSE " +
-                "AND c.is_active = TRUE AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())";
+        String query =
+            "SELECT c.* FROM Coupons c " +
+            "JOIN UserCoupons uc ON c.id = uc.coupon_id " +
+            "WHERE uc.user_id = ? AND uc.is_used = FALSE " +
+            "AND c.is_active = TRUE AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())";
 
-        System.out.println("DEBUG: findUserCoupons called for userId: " + userId);
+        System.out.println(
+            "DEBUG: findUserCoupons called for userId: " + userId
+        );
         try {
             PreparedStatement stmt = db.prepareStatement(query);
             stmt.setInt(1, userId);
@@ -260,14 +265,42 @@ public class CouponDAO {
     }
 
     /**
+     * Gets the total usage count for a coupon.
+     *
+     * @param couponId The coupon ID
+     * @return The number of times the coupon has been used
+     */
+    public int getCouponUsageCount(int couponId) {
+        String query =
+            "SELECT COUNT(*) as usage_count FROM UserCoupons WHERE coupon_id = ? AND is_used = TRUE";
+
+        try {
+            PreparedStatement stmt = db.prepareStatement(query);
+            stmt.setInt(1, couponId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("usage_count");
+            }
+        } catch (SQLException e) {
+            System.err.println(
+                "Get coupon usage count error: " + e.getMessage()
+            );
+        }
+
+        return 0;
+    }
+
+    /**
      * Marks a user's coupon as used.
-     * 
+     *
      * @param userId   The user ID
      * @param couponId The coupon ID
      * @return true if successful
      */
     public boolean markCouponUsed(int userId, int couponId) {
-        String query = "UPDATE UserCoupons SET is_used = TRUE WHERE user_id = ? AND coupon_id = ?";
+        String query =
+            "UPDATE UserCoupons SET is_used = TRUE WHERE user_id = ? AND coupon_id = ?";
 
         try {
             PreparedStatement stmt = db.prepareStatement(query);
@@ -276,7 +309,6 @@ public class CouponDAO {
 
             int rows = stmt.executeUpdate();
             return rows > 0;
-
         } catch (SQLException e) {
             System.err.println("Mark coupon used error: " + e.getMessage());
             return false;
@@ -285,12 +317,13 @@ public class CouponDAO {
 
     /**
      * Extracts a Coupon object from a ResultSet.
-     * 
+     *
      * @param rs The ResultSet positioned at the coupon row
      * @return Coupon object
      * @throws SQLException If data extraction fails
      */
-    private Coupon extractCouponFromResultSet(ResultSet rs) throws SQLException {
+    private Coupon extractCouponFromResultSet(ResultSet rs)
+        throws SQLException {
         Coupon coupon = new Coupon();
         coupon.setId(rs.getInt("id"));
         coupon.setCode(rs.getString("code"));
@@ -303,6 +336,18 @@ public class CouponDAO {
         }
 
         coupon.setActive(rs.getBoolean("is_active"));
+
+        // Try to get max_usage if column exists
+        try {
+            coupon.setMaxUsage(rs.getInt("max_usage"));
+        } catch (SQLException e) {
+            // Column doesn't exist yet, default to 0 (unlimited)
+            coupon.setMaxUsage(0);
+        }
+
+        // Get usage count
+        int usageCount = getCouponUsageCount(coupon.getId());
+        coupon.setUsageCount(usageCount);
 
         return coupon;
     }
