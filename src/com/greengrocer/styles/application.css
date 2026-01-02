@@ -1,4 +1,4 @@
-/* 
+/*
  * Group17 GreenGrocer - Application Stylesheet
  * JavaFX CSS for the Greengrocer Application
  */
@@ -89,6 +89,7 @@
     -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #27ae60;
+    -fx-text-alignment: center;
 }
 
 .subtitle {
@@ -408,7 +409,7 @@
     -fx-background-color: transparent;
 }
 
-.scroll-pane>.viewport {
+.scroll-pane > .viewport {
     -fx-background-color: transparent;
 }
 
@@ -421,12 +422,12 @@
     -fx-background-color: white;
 }
 
-.titled-pane>.title {
+.titled-pane > .title {
     -fx-background-color: #27ae60;
     -fx-background-radius: 8 8 0 0;
 }
 
-.titled-pane>.title>.text {
+.titled-pane > .title > .text {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-fill: white;
@@ -466,7 +467,7 @@
     -fx-background-color: white;
 }
 
-.dialog-pane>.button-bar>.container {
+.dialog-pane > .button-bar > .container {
     -fx-background-color: #f8f9fa;
 }
 
@@ -483,7 +484,7 @@
 }
 
 /* ==================== TAB PANE ==================== */
-.tab-pane>.tab-header-area>.tab-header-background {
+.tab-pane > .tab-header-area > .tab-header-background {
     -fx-background-color: #ecf0f1;
 }
 

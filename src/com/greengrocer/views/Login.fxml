@@ -5,27 +5,29 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.greengrocer.controllers.LoginController"
             styleClass="main-container">
-    
+
     <center>
         <StackPane alignment="CENTER" styleClass="main-container">
             <VBox alignment="CENTER" spacing="0" styleClass="login-box" prefWidth="400" maxWidth="400" prefHeight="480" maxHeight="480" minHeight="320">
-            
+
             <!-- Header Section -->
             <VBox alignment="CENTER" spacing="2" styleClass="login-header">
                 <padding>
                     <Insets bottom="8" left="20" right="20" top="20" />
                 </padding>
-                <Label text="🥬 Group17 GreenGrocer" styleClass="app-title"/>
-                <Label text="Please enter your details to sign in" styleClass="subtitle">
+                <HBox alignment="CENTER">
+                    <Label text="Group17 GreenGrocer" styleClass="app-title" alignment="CENTER"/>
+                </HBox>
+                <Label text="Please enter your details to sign in" styleClass="subtitle" alignment="CENTER" maxWidth="Infinity">
                     <VBox.margin>
                         <Insets top="5" />
                     </VBox.margin>
                 </Label>
             </VBox>
-            
+
             <!-- Styled Divider -->
             <HBox alignment="CENTER">
                 <Separator prefWidth="300" styleClass="login-divider"/>
@@ -33,13 +35,13 @@
                     <Insets top="10" />
                 </VBox.margin>
             </HBox>
-            
+
             <!-- Login Form Section -->
             <VBox spacing="8" styleClass="form-section">
                 <padding>
                     <Insets bottom="20" left="20" right="20" top="20" />
                 </padding>
-                
+
                 <VBox spacing="6">
                     <VBox.margin>
                         <Insets top="10" />
@@ -47,7 +49,7 @@
                     <Label text="Username" styleClass="field-label"/>
                     <TextField fx:id="usernameField" promptText="Enter your username" styleClass="text-field"/>
                 </VBox>
-                
+
                 <VBox spacing="6">
                     <VBox.margin>
                         <Insets top="10" />
@@ -55,18 +57,18 @@
                     <Label text="Password" styleClass="field-label"/>
                     <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="text-field"/>
                 </VBox>
-                
+
                 <!-- Error Label -->
                 <Label fx:id="errorLabel" styleClass="error-label" visible="false" managed="false"/>
-                
+
                 <!-- Login Button -->
-                <Button fx:id="loginButton" text="Login" onAction="#handleLogin" 
+                <Button fx:id="loginButton" text="Login" onAction="#handleLogin"
                         styleClass="signin-button" maxWidth="Infinity">
                         <VBox.margin>
                             <Insets top="15" />
                         </VBox.margin>
                 </Button>
-                
+
                 <!-- Register Link -->
                 <HBox alignment="CENTER" spacing="5">
                     <Label text="Don't have an account?" styleClass="small-text"/>
@@ -76,5 +78,5 @@
             </VBox>
         </StackPane>
     </center>
-    
+
 </BorderPane>
